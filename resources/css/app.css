@@ -1,11 +1,404 @@
-@import 'tailwindcss';
+/* resources/css/app.css — SISTEMA · Tailwind CSS v4 (config CSS-first, sem tailwind.config.js)
+   Fontes: no <head> do layout Blade (já está em components/layouts/*.blade.php):
+   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+*/
+@import "tailwindcss";
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* Onde o Tailwind procura classes (a detecção automática já cobre quase tudo; estes garantem) */
+@source "../views";
+@source "../js";
+@source "../../config/sistema.php";
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
 
+/* ═════════════════ ETAPA 1 · DESIGN TOKENS (@theme) ═════════════════
+   Cada variável gera utilitárias: --color-void → bg-void / text-void / border-void…  */
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  /* ─── CORES ─── */
+  --color-void: #05070f;               /* fundo da página */
+  --color-surface: #0b1220;            /* janela / card */
+  --color-surface-raised: #111a2e;     /* modal, card em foco, inputs */
+  --color-surface-hover: #16213a;      /* hover/pressed de linhas e itens */
+
+  --color-line: rgba(96, 165, 250, 0.25);        /* borda padrão */
+  --color-line-strong: rgba(96, 165, 250, 0.5);  /* hover / selecionado */
+  --color-line-subtle: rgba(96, 165, 250, 0.12); /* divisores internos */
+
+  --color-sys-300: #93c5fd;
+  --color-sys-400: #60a5fa;            /* destaque, link, ícone ativo */
+  --color-sys-500: #3b82f6;            /* marca: bordas ativas, ícones, barras */
+  --color-sys-600: #2563eb;            /* FUNDO de botão (texto branco 5.2:1 ✓ AA) */
+  --color-sys-700: #1d4ed8;            /* botão pressed */
+  --color-sys-glow: #38bdf8;           /* brilho / foco */
+
+  --color-ink: #e2e8f0;                /* texto principal (13.9:1) */
+  --color-ink-soft: #94a3b8;           /* secundário (6.8:1) */
+  --color-ink-muted: #7b8ba3;          /* legendas (5.0:1) */
+  --color-ink-faint: #475569;          /* só decorativo / disabled */
+
+  --color-success: #2dd4bf;  --color-success-text: #5eead4;
+  --color-warning: #f59e0b;  --color-warning-text: #fbbf24;
+  --color-danger: #f43f5e;   --color-danger-text: #fb7185;
+  --color-gain: #34d399;     --color-gain-text: #6ee7b7;
+  --color-gold: #fbbf24;
+
+  --color-rank-e: #94a3b8;
+  --color-rank-d: #34d399;
+  --color-rank-c: #38bdf8;
+  --color-rank-b: #818cf8;
+  --color-rank-a: #f59e0b;
+  --color-rank-s: #a855f7;
+  --color-rank-s-text: #c084fc;
+
+  --color-rarity-legendary: #a855f7;   /* Urgente */
+  --color-rarity-rare: #60a5fa;        /* Importante */
+  --color-rarity-common: #94a3b8;      /* Dia a dia */
+  --color-rarity-junk: #475569;        /* Não importante */
+
+  /* ─── TIPOGRAFIA ─── */
+  --font-display: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --text-2xs: 0.6875rem;  --text-2xs--line-height: 1rem;      --text-2xs--letter-spacing: 0.08em;
+  --text-xs: 0.75rem;     --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;    --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;      --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;    --text-lg--line-height: 1.625rem;
+  --text-xl: 1.25rem;     --text-xl--line-height: 1.75rem;    --text-xl--letter-spacing: 0.01em;
+  --text-2xl: 1.5rem;     --text-2xl--line-height: 2rem;      --text-2xl--letter-spacing: 0.01em;
+  --text-3xl: 1.875rem;   --text-3xl--line-height: 2.25rem;   --text-3xl--letter-spacing: 0.02em;
+  --text-4xl: 2.25rem;    --text-4xl--line-height: 2.5rem;    --text-4xl--letter-spacing: 0.02em;
+  --text-stat: 3rem;      --text-stat--line-height: 1;        --text-stat--letter-spacing: 0.02em;
+  --text-hero: 4.5rem;    --text-hero--line-height: 1;        --text-hero--letter-spacing: 0.04em;
+
+  /* ─── ESPAÇO (a escala padrão de 4px continua; estes são nomes extras) ─── */
+  --spacing-tap: 2.75rem;      /* 44px — alvo mínimo de toque: size-tap, min-h-tap… */
+  --spacing-tap-lg: 3.5rem;    /* 56px — FAB */
+  --spacing-gutter: 1rem;      /* 16px — margem lateral mobile: px-gutter */
+  --spacing-nav: 4rem;         /* 64px — altura da bottom nav */
+
+  /* ─── RAIOS (a forma é o chanfro; raio só em controles pequenos) ─── */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-pill: 999px;
+
+  /* ─── BRILHO / SOMBRA ─── */
+  --shadow-glow-sm: 0 0 6px rgba(56, 189, 248, 0.25);
+  --shadow-glow: 0 0 12px rgba(56, 189, 248, 0.3), 0 0 2px rgba(56, 189, 248, 0.6);
+  --shadow-glow-lg: 0 0 24px rgba(56, 189, 248, 0.35), 0 0 4px rgba(56, 189, 248, 0.7);
+  --shadow-glow-s: 0 0 16px rgba(168, 85, 247, 0.45), 0 0 3px rgba(192, 132, 252, 0.8);
+  --shadow-glow-danger: 0 0 12px rgba(244, 63, 94, 0.35);
+  --shadow-elev: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --drop-shadow-glow: 0 0 6px rgba(56, 189, 248, 0.35);
+
+  /* ─── MOVIMENTO ───
+     Durações: o v4 não tem namespace de duração → use duration-90 · 160 · 240 · 400 · 900 (qualquer número funciona).
+     Easings: sobrescrevem os padrões do Tailwind (ease-out / ease-in) e criam ease-snap. */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);     /* entradas: rápido e assenta */
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);      /* saídas */
+  --ease-snap: cubic-bezier(0.2, 0.9, 0.1, 1.2); /* leve overshoot (check, números) */
+
+  --animate-sys-open: sys-open 280ms var(--ease-out) both;
+  --animate-sys-close: sys-close 180ms var(--ease-in) both;
+  --animate-toast-in: toast-in 240ms var(--ease-out) both;
+  --animate-glow-pulse: glow-pulse 2.4s ease-in-out infinite;
+  --animate-check-pop: check-pop 200ms var(--ease-snap) both;
+  /* keyframes ficam mais abaixo (fora do @theme) porque também são usados por classes próprias */
+
+  /* Camadas (o v4 não tem namespace de z-index): nav z-40 · fab z-45 · modal z-50 · toast z-60 · levelup z-70 */
+}
+
+/* ───────────────── BASE ───────────────── */
+@layer base {
+  :root {
+    color-scheme: dark;
+    --sys-border: var(--color-line);
+    --sys-border-strong: var(--color-line-strong);
+    --sys-surface: var(--color-surface);
+    --sys-raised: var(--color-surface-raised);
+    --sys-glow: var(--color-sys-glow);
+    --ch: 10px; /* tamanho padrão do chanfro */
+  }
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    @apply bg-void font-sans text-base text-ink antialiased;
+    /* grade holográfica estática, custo zero de GPU */
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(37, 99, 235, 0.18), transparent 70%),
+      linear-gradient(rgba(96, 165, 250, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(96, 165, 250, 0.035) 1px, transparent 1px);
+    background-size: 100% 100%, 32px 32px, 32px 32px;
+    background-attachment: fixed;
+  }
+  h1, h2, h3, h4 { @apply font-display font-semibold tracking-wide; }
+
+  /* v4 tirou o cursor: pointer padrão dos botões — o Sistema quer de volta */
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]), summary { cursor: pointer; }
+
+  /* Foco visível único para todo o app */
+  :focus-visible { outline: 2px solid var(--sys-glow); outline-offset: 2px; }
+  :focus:not(:focus-visible) { outline: none; }
+}
+
+/* ───────────────── COMPONENTES-BASE ───────────────── */
+@layer components {
+  /* Borda chanfrada com traço de 1px.
+     O recorte fica nas pseudo-camadas, NÃO no elemento — assim
+     outline de foco e drop-shadow (glow) continuam funcionando.
+     Configure por variável:  --ch  --ch-border  --ch-bg  --ch-scan  */
+  .chamfer {
+    position: relative;
+    isolation: isolate;
+    --_poly: polygon(var(--ch) 0, 100% 0, 100% calc(100% - var(--ch)),
+             calc(100% - var(--ch)) 100%, 0 100%, 0 var(--ch));
+    --_poly-in: polygon(calc(var(--ch) - 0.41px) 0, 100% 0, 100% calc(100% - var(--ch) + 0.41px),
+                calc(100% - var(--ch) + 0.41px) 100%, 0 100%, 0 calc(var(--ch) - 0.41px));
+  }
+  .chamfer::before,
+  .chamfer::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    transition: background-color 160ms var(--ease-out);
+  }
+  .chamfer::before { inset: 0; clip-path: var(--_poly); background: var(--ch-border, var(--sys-border)); }
+  .chamfer::after {
+    inset: 1px;
+    clip-path: var(--_poly-in);
+    background: var(--ch-scan, linear-gradient(transparent, transparent)), var(--ch-bg, var(--sys-surface));
+  }
+  /* 4 cantos chanfrados (badges, botões pequenos) */
+  .chamfer-all {
+    --_poly: polygon(var(--ch) 0, calc(100% - var(--ch)) 0, 100% var(--ch), 100% calc(100% - var(--ch)),
+             calc(100% - var(--ch)) 100%, var(--ch) 100%, 0 calc(100% - var(--ch)), 0 var(--ch));
+    --_poly-in: var(--_poly);
+  }
+  .chamfer-sm { --ch: 6px; }
+  .chamfer-lg { --ch: 16px; }
+
+  /* Janela do Sistema — uso: class="chamfer sys-window scanlines" */
+  .sys-window { --ch-bg: linear-gradient(180deg, rgba(37, 99, 235, 0.1), transparent 64px), var(--sys-surface); }
+  .sys-window-raised { --ch-bg: var(--sys-raised); }
+
+  /* Rótulo técnico: [ STATUS ] */
+  .sys-label { @apply font-display text-2xs font-semibold uppercase text-sys-400; letter-spacing: 0.14em; }
+}
+
+/* ───────────────── UTILITÁRIAS PRÓPRIAS ─────────────────
+   No v4, classe que precisa de variante (hover:glow, lg:glow-s…) tem que ser @utility. */
+@utility scanlines {
+  --ch-scan: repeating-linear-gradient(180deg, rgba(148, 163, 184, 0.035) 0 1px, transparent 1px 3px);
+  &:not(.chamfer) { background-image: var(--ch-scan); }
+}
+/* Glow que acompanha o chanfro (filter). Não animar — só estados. */
+@utility glow { filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.35)); }
+@utility glow-lg { filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.45)) drop-shadow(0 0 2px rgba(56, 189, 248, 0.8)); }
+@utility glow-s { filter: drop-shadow(0 0 10px rgba(168, 85, 247, 0.55)) drop-shadow(0 0 2px rgba(192, 132, 252, 0.9)); }
+@utility glow-none { filter: none; }
+/* Texto com brilho (nível, títulos de evento) */
+@utility text-glow { text-shadow: 0 0 12px rgba(56, 189, 248, 0.55); }
+@utility text-glow-s { text-shadow: 0 0 14px rgba(168, 85, 247, 0.7); }
+/* Borda do chanfro em 50% (selecionado) */
+@utility border-active { --ch-border: var(--sys-border-strong); }
+/* Números alinhados em valores monetários e XP */
+@utility tabular { font-variant-numeric: tabular-nums; }
+/* Espaço para a bottom nav + safe area do iPhone */
+@utility pb-safe-nav { padding-bottom: calc(4rem + env(safe-area-inset-bottom)); }
+@utility pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* ───────────────── ESTADOS (padrão de interação) ─────────────────
+   hover   → borda 0.25 → 0.50 (só em dispositivos com mouse)
+   active  → fundo raised + translateY(1px), sem glow
+   focus   → outline 2px #38BDF8 offset 2px (global, acima)
+   disabled→ opacity .45, sem glow, cursor not-allowed            */
+@media (hover: hover) {
+  .is-interactive:hover { --ch-border: var(--sys-border-strong); }
+}
+.is-interactive { transition: transform 90ms cubic-bezier(0.16, 1, 0.3, 1); }
+.is-interactive:active { transform: translateY(1px); --ch-bg: #16213a; }
+.is-interactive:disabled,
+.is-interactive[aria-disabled="true"] { opacity: 0.45; filter: none; cursor: not-allowed; transform: none; }
+
+/* ═════════════════ ETAPA 2 · COMPONENTES ═════════════════ */
+@layer components {
+  /* Botões: o fundo/borda vêm de variáveis → uma regra de estado serve a todas as variantes */
+  .sys-btn {
+    @apply inline-flex select-none items-center justify-center gap-2 font-display font-semibold uppercase tracking-[0.08em];
+    --ch: 8px;
+    --ch-bg: var(--btn-bg);
+    --ch-border: var(--btn-border);
+    transition: transform 90ms cubic-bezier(0.16, 1, 0.3, 1), filter 160ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @media (hover: hover) {
+    .sys-btn:hover:not(:disabled) { --ch-border: var(--btn-border-hover, var(--btn-border)); }
+  }
+  .sys-btn:active:not(:disabled) { transform: translateY(1px); --ch-bg: var(--btn-press, var(--btn-bg)); filter: none; }
+  .sys-btn:disabled, .sys-btn[aria-disabled="true"] { opacity: 0.45; filter: none; cursor: not-allowed; }
+  .sys-btn[data-loading] { pointer-events: none; }
+  .sys-btn[data-loading] > :not(.sys-spinner) { opacity: 0; }
+  .sys-spinner {
+    position: absolute; width: 18px; height: 18px; border-radius: 999px;
+    border: 2px solid currentColor; border-right-color: transparent;
+    animation: sys-spin 700ms linear infinite;
+  }
+
+  /* Menus <details> (missão ⋮, filtros) */
+  .sys-menu > summary { list-style: none; }
+  .sys-menu > summary::-webkit-details-marker { display: none; }
+  .sys-menu[open] > .sys-menu-panel { animation: toast-in 160ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  /* Modal (<dialog>): bottom sheet no mobile, centralizado ≥ sm */
+  .sys-dialog {
+    margin: auto auto 0; width: 100%; max-width: 100%; max-height: 92dvh;
+    padding: 0; border: 0; background: transparent; color: inherit; overflow: visible;
+  }
+  .sys-dialog::backdrop { background: rgba(2, 4, 10, 0.72); }
+  .sys-dialog[open] > .sys-dialog-panel { animation: sys-open 280ms cubic-bezier(0.16, 1, 0.3, 1) both; transform-origin: 50% 100%; }
+  .sys-dialog[data-closing] > .sys-dialog-panel { animation: sys-close 180ms cubic-bezier(0.7, 0, 0.84, 0) both; }
+  @media (min-width: 640px) {
+    .sys-dialog { margin: auto; width: calc(100% - 2rem); max-width: var(--dialog-w, 32rem); }
+    .sys-dialog[open] > .sys-dialog-panel { transform-origin: 50% 50%; }
+  }
+
+  /* Toasts */
+  .sys-toast-stack {
+    position: fixed; z-index: 60; left: 1rem; right: 1rem; top: calc(1rem + env(safe-area-inset-top));
+    display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none;
+  }
+  @media (min-width: 1024px) { .sys-toast-stack { left: auto; width: 24rem; } }
+  .sys-toast { pointer-events: auto; animation: toast-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .sys-toast[data-leaving] { animation: sys-close 180ms cubic-bezier(0.7, 0, 0.84, 0) both; }
+
+  /* Barra de XP: largura por variável → a transição anima sozinha */
+  .sys-xp-fill { width: var(--xp, 0%); transition: width 400ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .sys-xp-shine {
+    position: absolute; inset: 0; width: 40%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: translateX(-100%);
+  }
+
+  /* Missão concluída: check entra com leve overshoot */
+  [data-just-done] .sys-check-icon { animation: check-pop 200ms cubic-bezier(0.2, 0.9, 0.1, 1.2) both; }
+
+  /* Ponto pulsante (lendário, alertas) — anima só opacity */
+  .sys-pulse { animation: glow-pulse 2.4s ease-in-out infinite; }
+
+  /* Skeleton de gráfico */
+  .sys-skeleton { background: linear-gradient(90deg, #111a2e 0%, #16213a 50%, #111a2e 100%); background-size: 200% 100%; animation: sys-shimmer 1.4s linear infinite; }
+}
+/* keyframes também declarados aqui: o Tailwind só emite os do config quando a classe animate-* é usada */
+@keyframes sys-open { 0% { opacity: 0; transform: scaleY(0.04) scaleX(0.9); } 50% { opacity: 1; transform: scaleY(0.04) scaleX(1); } 100% { opacity: 1; transform: none; } }
+@keyframes sys-close { from { opacity: 1; transform: none; } to { opacity: 0; transform: scaleY(0.04); } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: none; } }
+@keyframes glow-pulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+@keyframes check-pop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
+@keyframes xp-shine { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@keyframes sys-spin { to { transform: rotate(360deg); } }
+@keyframes sys-shimmer { to { background-position: -200% 0; } }
+
+/* ═════════════════ ETAPA 5 · MICROINTERAÇÕES ═════════════════
+   Regras: só transform/opacity animam em loop; filter (glow) anima no máximo 1× por ação;
+   nada de blur animado; tudo cai para troca instantânea com prefers-reduced-motion.
+   Catálogo completo: docs/ETAPA-5-MICROINTERACOES.md                                   */
+/* easings --ease-out / --ease-in / --ease-snap: definidos no @theme (topo do arquivo) */
+
+@layer components {
+  /* M1 · Entrada da tela: filhos do <main> sobem 6px, 200ms, escalonados 30ms (máx. 5) */
+  .sys-enter > * { animation: sys-rise 200ms var(--ease-out) both; }
+  .sys-enter > :nth-child(2) { animation-delay: 30ms; }
+  .sys-enter > :nth-child(3) { animation-delay: 60ms; }
+  .sys-enter > :nth-child(4) { animation-delay: 90ms; }
+  .sys-enter > :nth-child(n + 5) { animation-delay: 120ms; }
+
+  /* M4 · Missão/item concluído: lampejo teal 1× na borda */
+  [data-mission][data-just-done],
+  [data-inventory-item][data-just-done] { animation: card-flash 600ms var(--ease-out); }
+
+  /* M5 · Risco que "corre" da esquerda para a direita (substitui line-through) */
+  .sys-strike {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat; background-position: 0 58%; background-size: 0% 1px;
+    transition: background-size 240ms var(--ease-out), color 160ms var(--ease-out);
+  }
+  [data-state="done"] .sys-strike { background-size: 100% 1px; }
+
+  /* M6 · "+50 XP" flutuando a partir do check */
+  .sys-float-xp {
+    position: fixed; z-index: 60; pointer-events: none; transform: translate(-50%, -50%);
+    font-family: 'Chakra Petch', sans-serif; font-weight: 700; font-size: 1rem; line-height: 1.1; text-align: center;
+    color: #38bdf8; text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+    animation: float-xp 800ms var(--ease-out) forwards;
+  }
+  .sys-float-xp small { display: block; font-size: 0.75rem; color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.6); }
+
+  /* M7 · Número que mudou (Ouro, nível): pulinho + brilho, 1× */
+  .sys-bump { display: inline-block; animation: num-bump 420ms var(--ease-snap); }
+
+  /* M8 · Barra de tempo do toast (pausa com hover/foco; o toast some no fim dela) */
+  .sys-toast-timer {
+    position: absolute; left: 1px; right: 10px; bottom: 1px; height: 2px;
+    background: currentColor; opacity: 0.55; transform-origin: left center;
+    animation: toast-timer var(--toast-ms, 3500ms) linear forwards;
+  }
+  .sys-toast:hover .sys-toast-timer,
+  .sys-toast:focus-within .sys-toast-timer { animation-play-state: paused; }
+
+  /* M9 · LEVEL UP — sequência coreografada (0 → 1,1 s) */
+  .sys-levelup[open] .lu-ring   { animation: lu-ring 900ms var(--ease-out) both; }
+  .sys-levelup[open] .lu-sweep  { animation: lu-sweep 900ms var(--ease-in) 100ms both; }
+  .sys-levelup[open] .lu-label  { animation: sys-rise 240ms var(--ease-out) 100ms both; }
+  .sys-levelup[open] .lu-title  { animation: lu-title 700ms var(--ease-out) 150ms both; }
+  .sys-levelup[open] .lu-levels { animation: sys-rise 300ms var(--ease-out) 500ms both; }
+  .sys-levelup[open] .lu-to     { animation: num-bump 420ms var(--ease-snap) 700ms both; }
+  .sys-levelup[open] .lu-rank   { animation: lu-rank 420ms var(--ease-snap) 800ms both; }
+  .sys-levelup[open] .lu-xp     { animation: sys-rise 240ms var(--ease-out) 850ms both; }
+  .sys-levelup[open] .lu-cta    { animation: sys-rise 240ms var(--ease-out) 950ms both; }
+  .sys-levelup::backdrop { animation: fade-in 200ms var(--ease-out) both; }
+}
+
+@keyframes sys-rise   { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes fade-in    { from { opacity: 0; } to { opacity: 1; } }
+@keyframes card-flash { 0% { filter: drop-shadow(0 0 0 rgba(45, 212, 191, 0)); } 30% { filter: drop-shadow(0 0 10px rgba(45, 212, 191, 0.55)); } 100% { filter: drop-shadow(0 0 0 rgba(45, 212, 191, 0)); } }
+@keyframes float-xp   { 0% { opacity: 0; transform: translate(-50%, -30%) scale(0.9); } 15% { opacity: 1; transform: translate(-50%, -80%) scale(1.06); } 100% { opacity: 0; transform: translate(-50%, -260%) scale(1); } }
+@keyframes num-bump   { 0% { transform: scale(1); } 40% { transform: scale(1.14); text-shadow: 0 0 12px currentColor; } 100% { transform: scale(1); } }
+@keyframes toast-timer { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes toast-timer-still { from { opacity: 0; } to { opacity: 0; } }
+@keyframes lu-ring    { from { opacity: 0; transform: translate(-50%, -50%) scale(0.6); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+@keyframes lu-sweep   { from { opacity: 0.9; transform: translateY(-50vh); } to { opacity: 0; transform: translateY(50vh); } }
+@keyframes lu-title   { from { opacity: 0; letter-spacing: 0.5em; transform: scaleY(0.2); } 60% { opacity: 1; transform: scaleY(1.05); } to { opacity: 1; letter-spacing: 0.04em; transform: none; } }
+@keyframes lu-rank    { from { opacity: 0; transform: scale(0.5) rotate(-8deg); } to { opacity: 1; transform: none; } }
+
+/* M10 · Troca de tela (View Transitions entre documentos — Chrome/Edge 126+, Safari 18.2+;
+   em navegadores sem suporte a troca é normal). HUD, sidebar e bottom nav ficam parados;
+   só o conteúdo faz crossfade, e o traço do item ativo desliza até o novo item. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: 120ms var(--ease-in) both fade-out; }
+::view-transition-new(root) { animation: 180ms var(--ease-out) both fade-in; }
+@keyframes fade-out { to { opacity: 0; } }
+.vt-hud     { view-transition-name: sys-hud; }
+.vt-sidebar { view-transition-name: sys-sidebar; }
+.vt-navbar  { view-transition-name: sys-navbar; }
+.vt-marker  { view-transition-name: sys-nav-marker; }
+::view-transition-group(sys-nav-marker) { animation-duration: 260ms; animation-timing-function: var(--ease-out); }
+::view-transition-old(sys-hud), ::view-transition-new(sys-hud),
+::view-transition-old(sys-sidebar), ::view-transition-new(sys-sidebar),
+::view-transition-old(sys-navbar), ::view-transition-new(sys-navbar) { animation: none; }
+
+/* ───────────────── MOVIMENTO REDUZIDO ─────────────────
+   Tudo vira troca instantânea. Exceções: o TEMPO do toast continua (a barra só fica invisível)
+   e o "+XP" flutuante some (o toast já informa).                                        */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  .sys-toast-timer { animation-name: toast-timer-still !important; animation-duration: var(--toast-ms, 3500ms) !important; }
+  .sys-float-xp { display: none !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
 }

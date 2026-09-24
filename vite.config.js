@@ -1,3 +1,5 @@
+// vite.config.js — Laravel + Tailwind CSS v4 (plugin oficial do Vite, sem PostCSS/autoprefixer)
+// npm i -D tailwindcss @tailwindcss/vite
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
@@ -10,9 +12,4 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
-    server: {
-        watch: {
-            ignored: ['**/storage/framework/views/**'],
-        },
-    },
 });
