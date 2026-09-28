@@ -12,9 +12,7 @@
 --}}
 @props(['title' => null, 'badges' => []])
 
-@php $badges = array_merge($navBadges ?? [], $badges);
-$jogador = "Gui";
-@endphp
+@php $badges = array_merge($navBadges ?? [], $badges); @endphp
 
 <!DOCTYPE html>
 <html lang="pt-BR" class="bg-void">

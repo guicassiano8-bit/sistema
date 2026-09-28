@@ -19,7 +19,7 @@
        ]) }}>
 
     {{-- ─── IDENTIDADE / JOGADOR ─── --}}
-    <a href="{{ Route::has('status') ? route('status') : '#' }}"
+    <a href="{{ Route::has('dashboard') ? route('dashboard') : '#' }}"
        aria-label="Status do jogador: nível {{ $jogador->nivel }}, rank {{ $jogador->rank }}"
        class="group/card flex flex-col items-center gap-1 px-2 pb-3 pt-4 lg:m-3 lg:mb-2 lg:items-stretch lg:gap-3 lg:p-0">
 
@@ -110,7 +110,7 @@
 
     {{-- ─── RODAPÉ ─── --}}
     <div class="border-t border-line-subtle p-2 lg:p-3">
-        <form method="POST" action="{{ Route::has('logout') ? route('logout') : '#' }}">
+        <form method="POST" action="{{ Route::has('login.destroy') ? route('login.destroy') : '#' }}">
             @csrf
             <button type="submit"
                     class="flex min-h-tap w-full flex-col items-center justify-center gap-1 rounded-sm text-ink-muted transition-colors duration-160 hover:bg-surface-hover hover:text-danger-text lg:flex-row lg:justify-start lg:gap-3 lg:px-3">
