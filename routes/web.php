@@ -8,3 +8,4 @@ Route::post('/logout', [LoginController::class, 'destroy'])->name('login.destroy
 Route::post('/', [LoginController::class, 'store'])->name('login.store')->middleware('guest');
 
 Route::view('/dashboard', 'status.index')->name('dashboard')->middleware('auth');
+Route::view('/missoes', 'missoes.index')->name('tasks.index')->middleware('auth');
