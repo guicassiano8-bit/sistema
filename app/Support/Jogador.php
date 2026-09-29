@@ -5,6 +5,7 @@
 namespace App\Support;
 
 use App\Models\User;
+use App\Services\LevelService;
 
 class Jogador
 {
@@ -25,34 +26,23 @@ class Jogador
         $this->nome = $user->name;
         $this->ouro = $user->ouro;
 
-        // curva de nível: cada nível pede um pouco mais que o anterior
-        $nivel = 1;
-        $resto = $user->xp_total;
-        while ($resto >= self::xpParaPassar($nivel)) {
-            $resto -= self::xpParaPassar($nivel);
-            $nivel++;
-        }
+        $calculo = LevelService::calcular($user->xp_total);
 
-        $this->nivel = $nivel;
-        $this->xp = $resto;
-        $this->xp_proximo = self::xpParaPassar($nivel);
-        $this->rank = self::rankDoNivel($nivel);
+        $this->nivel = $calculo['nivel'];
+        $this->xp = $calculo['xp'];
+        $this->xp_proximo = $calculo['xp_proximo'];
+        $this->rank = $calculo['rank'];
     }
 
-    public static function xpParaPassar(int $nivel): int
+    /** Formato do "player" no contrato JSON dos endpoints de toggle (ver AGENTS.md). */
+    public function toArray(): array
     {
-        return 100 + ($nivel - 1) * 50;   // nível 1 → 100 XP, nível 2 → 150, nível 27 → 1.400…
-    }
-
-    public static function rankDoNivel(int $nivel): string
-    {
-        return match (true) {
-            $nivel >= 70 => 'S',
-            $nivel >= 50 => 'A',
-            $nivel >= 35 => 'B',
-            $nivel >= 20 => 'C',
-            $nivel >= 10 => 'D',
-            default => 'E',
-        };
+        return [
+            'xp' => $this->xp,
+            'xp_max' => $this->xp_proximo,
+            'level' => $this->nivel,
+            'gold' => $this->ouro,
+            'rank' => $this->rank,
+        ];
     }
 }

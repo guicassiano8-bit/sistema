@@ -1,8 +1,8 @@
 {{-- VISÃO DIA — atrasadas (se hoje) → diárias → avulsas
      Etapa 5: contadores dentro de [data-progress-scope] se atualizam sozinhos ao marcar (sistema.js). --}}
 @php
-$atrasadas = $missoes->filter->atrasada;
-$doDia     = $missoes->reject->atrasada;
+$atrasadas = $missoes->filter->is_overdue;
+$doDia     = $missoes->reject->is_overdue;
 $diarias   = $doDia->whereNotNull('recorrencia')->sortBy('concluida');
 $avulsas   = $doDia->whereNull('recorrencia')->sortBy([['concluida', 'asc'], ['horario', 'asc']]);
 $feitas    = $missoes->where('concluida', true);

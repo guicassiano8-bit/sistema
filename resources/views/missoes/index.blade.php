@@ -12,7 +12,7 @@
     ano    → $resumoAno array 'Y-m-d' => ['total' => int, 'feitas' => int]
 --}}
 @php
-$link = fn ($v, $d = null) => route('tasks.index', ['v' => $v, 'data' => ($d ?? $data)->format('Y-m-d')]);
+$link = fn ($v, $d = null) => route('missoes.index', ['v' => $v, 'data' => ($d ?? $data)->format('Y-m-d')]);
 $titulo = match ($visao) {
     'dia'    => $data->isToday() ? 'Hoje · ' . $data->translatedFormat('D, d M') : $data->translatedFormat('l, d M'),
     'semana' => $data->copy()->startOfWeek(\Carbon\Carbon::SUNDAY)->translatedFormat('d M') . ' – ' . $data->copy()->endOfWeek(\Carbon\Carbon::SATURDAY)->translatedFormat('d M'),

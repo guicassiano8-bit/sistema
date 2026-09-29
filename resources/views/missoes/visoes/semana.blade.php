@@ -47,16 +47,16 @@ $diaLink = fn ($d) => route('missoes.index', ['v' => 'dia', 'data' => $d->format
             </a>
             @forelse ($ms as $m)
                 <form method="POST" action="{{ route('missoes.toggle', $m) }}" data-mission-toggle
-                      data-mission data-state="{{ $m->concluida ? 'done' : 'pending' }}" data-xp="{{ $m->xp }}" data-title="{{ $m->titulo }}"
+                      data-mission data-state="{{ $m->status ? 'done' : 'pending' }}" data-xp="{{ $m->points }}" data-title="{{ $m->title }}"
                       class="group">
                     @csrf @method('PATCH')
-                    <button type="submit" aria-pressed="{{ $m->concluida ? 'true' : 'false' }}" aria-label="Concluir missão: {{ $m->titulo }}"
+                    <button type="submit" aria-pressed="{{ $m->status ? 'true' : 'false' }}" aria-label="Concluir missão: {{ $m->title }}"
                             class="flex w-full items-start gap-1.5 rounded-sm px-1 py-1 text-left hover:bg-surface-hover">
                         <span class="mt-0.5 flex size-3.5 shrink-0 items-center justify-center border border-sys-400/60 text-transparent group-data-[state=done]:border-success group-data-[state=done]:bg-success/20 group-data-[state=done]:text-success-text">
                             <x-sys.icon name="check" size="size-3" :stroke="3" />
                         </span>
-                        <span class="min-w-0 flex-1 text-xs leading-snug text-ink group-data-[state=done]:text-ink-muted"><span class="sys-strike">{{ $m->titulo }}</span></span>
-                        <span class="font-display text-2xs font-semibold text-sys-glow group-data-[state=done]:text-ink-muted">+{{ $m->xp }}</span>
+                        <span class="min-w-0 flex-1 text-xs leading-snug text-ink group-data-[state=done]:text-ink-muted"><span class="sys-strike">{{ $m->title }}</span></span>
+                        <span class="font-display text-2xs font-semibold text-sys-glow group-data-[state=done]:text-ink-muted">+{{ $m->points }}</span>
                     </button>
                 </form>
             @empty

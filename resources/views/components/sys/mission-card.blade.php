@@ -5,7 +5,7 @@
       title="Estudar Laravel — 1h"
       :xp="100" :gold="20" time="19:00" rank="C"
       recurring="Diária"
-      :done="$m->concluida" :overdue="$m->atrasada"
+      :done="$m->is_done" :overdue="$m->is_overdue"
       :toggle-url="route('missoes.toggle', $m)"
       :transfer-url="route('missoes.transferir', $m)"
       :edit-url="route('missoes.edit', $m)"

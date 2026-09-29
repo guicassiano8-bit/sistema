@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PointCurrency;
 use App\Enums\PointTransactionType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -16,6 +17,7 @@ class PointTransaction extends Model
     protected $fillable = [
         'amount',
         'type',
+        'currency',
         'source_type',
         'source_id',
     ];
@@ -24,6 +26,7 @@ class PointTransaction extends Model
     {
         return [
             'type' => PointTransactionType::class,
+            'currency' => PointCurrency::class,
             'amount' => 'integer',
         ];
     }
@@ -44,9 +47,9 @@ class PointTransaction extends Model
 
     // Consultas
 
-    /** Saldo atual de pontos. */
-    public static function balance(): int
+    /** Saldo atual de uma moeda (xp ou gold). */
+    public static function balance(PointCurrency $currency): int
     {
-        return (int) static::query()->sum('amount');
+        return (int) static::query()->where('currency', $currency)->sum('amount');
     }
 }

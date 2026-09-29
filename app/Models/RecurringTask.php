@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\Frequency;
+use Database\Factories\RecurringTaskFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -13,6 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class RecurringTask extends Model
 {
+    /** @use HasFactory<RecurringTaskFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'title',
         'description',
