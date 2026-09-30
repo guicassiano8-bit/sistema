@@ -2,18 +2,23 @@
 
 namespace App\Models;
 
+use App\Enums\TaskRank;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Reward extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'shopping_item_id',
         'name',
         'description',
         'cost',
+        'rank',
         'is_active',
         'is_repeatable',
     ];
@@ -22,6 +27,7 @@ class Reward extends Model
     {
         return [
             'cost' => 'integer',
+            'rank' => TaskRank::class,
             'is_active' => 'boolean',
             'is_repeatable' => 'boolean',
         ];

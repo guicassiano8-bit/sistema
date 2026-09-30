@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RewardController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TasksController;
 use Illuminate\Support\Facades\Route;
@@ -18,3 +19,6 @@ Route::patch('/missoes/{missao}/cancelar', [TasksController::class, 'cancelar'])
 Route::delete('/missoes/{missao}/serie', [TasksController::class, 'encerrarSerie'])->name('missoes.encerrar-serie')->middleware('auth');
 Route::patch('/missoes/{missao}/toggle', [TasksController::class, 'toggle'])->name('missoes.toggle')->middleware('auth');
 Route::patch('/missoes/{missao}/transferir', [TasksController::class, 'transferir'])->name('missoes.transferir')->middleware('auth');
+
+Route::resource('/recompensas', RewardController::class)->except(['create', 'show'])->parameters(['recompensas' => 'recompensa'])->middleware('auth');
+Route::post('/recompensas/{recompensa}/trocar', [RewardController::class, 'trocar'])->name('recompensas.trocar')->middleware('auth');

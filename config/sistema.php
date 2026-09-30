@@ -8,9 +8,9 @@
 return [
 
     'nav' => [
-        ['key' => 'status',     'label' => 'Status',     'icon' => 'status',  'route' => 'status',           'match' => 'status',       'atalho' => '1'],
+        ['key' => 'status',     'label' => 'Status',     'icon' => 'status',  'route' => 'dashboard',           'match' => 'status',       'atalho' => '1'],
         ['key' => 'missoes',    'label' => 'Missões',    'icon' => 'target',  'route' => 'missoes.index',    'match' => 'missoes.*',    'atalho' => '2'],
-        ['key' => 'loja',       'label' => 'Loja',       'icon' => 'shop',    'route' => 'loja.index',       'match' => ['loja.*', 'recompensas.*'], 'atalho' => '3'],
+        ['key' => 'loja',       'label' => 'Loja',       'icon' => 'shop',    'route' => 'recompensas.index',       'match' => ['loja.*', 'recompensas.*'], 'atalho' => '3'],
         ['key' => 'inventario', 'label' => 'Inventário', 'icon' => 'package', 'route' => 'inventario.index', 'match' => 'inventario.*', 'atalho' => '4'],
         ['key' => 'tesouro',    'label' => 'Tesouro',    'icon' => 'gem',     'route' => 'tesouro.index',    'match' => 'tesouro.*', 'atalho' => '5'],
     ],
