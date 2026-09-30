@@ -23,6 +23,7 @@ class RecurringTaskFactory extends Factory
         return [
             'title' => fake()->sentence(3),
             'points' => fake()->randomElement([10, 30, 50, 100]),
+            'gold' => fn (array $atributos) => $atributos['points'],
             'frequency' => Frequency::Daily,
             'interval' => 1,
             'starts_on' => today(),

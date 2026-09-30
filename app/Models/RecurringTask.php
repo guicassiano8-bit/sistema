@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\Frequency;
+use App\Enums\TaskRank;
 use Database\Factories\RecurringTaskFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,6 +23,8 @@ class RecurringTask extends Model
         'title',
         'description',
         'points',
+        'gold',
+        'rank',
         'frequency',
         'interval',
         'days_of_week',
@@ -38,6 +41,8 @@ class RecurringTask extends Model
         return [
             'frequency' => Frequency::class,
             'points' => 'integer',
+            'gold' => 'integer',
+            'rank' => TaskRank::class,
             'interval' => 'integer',
             'days_of_week' => 'array',
             'day_of_month' => 'integer',

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TaskRank;
 use App\Enums\TaskStatus;
 use Database\Factories\TaskFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +22,8 @@ class Task extends Model
         'title',
         'description',
         'points',
+        'gold',
+        'rank',
         'scheduled_date',
         'occurrence_date',
         'original_date',
@@ -41,6 +44,8 @@ class Task extends Model
         return [
             'status' => TaskStatus::class,
             'points' => 'integer',
+            'gold' => 'integer',
+            'rank' => TaskRank::class,
             'scheduled_date' => 'date',
             'occurrence_date' => 'date',
             'original_date' => 'date',

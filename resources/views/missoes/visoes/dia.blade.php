@@ -22,6 +22,10 @@ $feitas    = $missoes->where('concluida', true);
         <x-sys.window :label="'Atrasadas · ' . $atrasadas->count()" variant="danger" padding="sm">
             <div class="flex flex-col gap-2">
                 @foreach ($atrasadas as $m) @include('missoes._card', ['m' => $m]) @endforeach
+                <form method="POST" action="{{ route('missoes.atrasadas-hoje') }}">
+                    @csrf @method('PATCH')
+                    <x-sys.button type="submit" variant="secondary" icon="arrow-right" class="w-full">Trazer todas para hoje</x-sys.button>
+                </form>
             </div>
         </x-sys.window>
     @endif

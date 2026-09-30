@@ -1,10 +1,12 @@
 {{--
   Converte um Model Task no <x-sys.mission-card>. Use: @include('missoes._card', ['m' => $missao])
-  Task não tem ouro nem rank por missão (ouro/rank são do jogador, ver App\Support\Jogador).
+  Ouro e dificuldade (rank) vêm da própria Task; rank é só visual.
 --}}
 <x-sys.mission-card
     :title="$m->title"
     :xp="$m->points"
+    :gold="$m->gold"
+    :rank="$m->rank?->value"
     :time="$m->is_overdue ? $m->scheduled_date->translatedFormat('d/m') : ($m->start_time ? substr($m->start_time, 0, 5) : null)"
     :recurring="$m->recurringTask?->frequency?->label()"
     :done="$m->is_done"

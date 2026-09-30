@@ -52,7 +52,8 @@ describe('store', function () {
         expect($recurringTask->days_of_week)->toBeNull();
         expect($recurringTask->starts_on->toDateString())->toBe('2026-10-01');
 
-        $task = Task::sole();
+        // a primeira ocorrência é a do dia escolhido; as seguintes vêm do gerador
+        $task = Task::orderBy('occurrence_date')->first();
         expect($task->recurring_task_id)->toBe($recurringTask->id);
         expect($task->occurrence_date->toDateString())->toBe('2026-10-01');
     });

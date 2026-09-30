@@ -5,6 +5,10 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
+/**
+ * Cria missão por dois caminhos: o modal rápido (regras enxutas, bag
+ * "missaoRapida") e o formulário completo, que envia completo=1.
+ */
 class TaskStoreRequest extends FormRequest
 {
     /**
@@ -20,6 +24,19 @@ class TaskStoreRequest extends FormRequest
         return true;
     }
 
+    /** O formulário completo usa a bag padrão, que o x-sys.input lê sozinho. */
+    protected function prepareForValidation(): void
+    {
+        if ($this->isCompleto()) {
+            $this->errorBag = 'default';
+        }
+    }
+
+    public function isCompleto(): bool
+    {
+        return $this->boolean('completo');
+    }
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,6 +44,10 @@ class TaskStoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        if ($this->isCompleto()) {
+            return TaskUpdateRequest::formRules();
+        }
+
         return [
             'titulo' => 'required|string|max:255',
             'xp' => 'required|integer|in:10,30,50,100',

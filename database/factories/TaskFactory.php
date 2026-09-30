@@ -25,6 +25,7 @@ class TaskFactory extends Factory
         return [
             'title' => fake()->sentence(3),
             'points' => fake()->randomElement([10, 30, 50, 100]),
+            'gold' => fn (array $atributos) => $atributos['points'],
             'scheduled_date' => $data,
             'original_date' => $data,
             'status' => TaskStatus::Pending,
