@@ -33,14 +33,14 @@ O acesso é só por login. Não há cadastro público nem recuperação de senha
 
 ## Stack
 
-- PHP 8.2+ e [Laravel 13](https://laravel.com/docs/13.x)
+- PHP 8.4+ e [Laravel 13](https://laravel.com/docs/13.x)
 - Blade, Tailwind CSS v4 e JavaScript puro, empacotados com Vite
 - Banco padrão: SQLite. MySQL também serve, ajustando o `.env`
 - Testes com [Pest](https://pestphp.com)
 
 ## Como rodar
 
-Requisitos: PHP 8.2+, Composer, Node.js e npm.
+Requisitos: PHP 8.4+, Composer, Node.js e npm.
 
 ```bash
 composer install
