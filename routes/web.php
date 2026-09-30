@@ -20,5 +20,7 @@ Route::delete('/missoes/{missao}/serie', [TasksController::class, 'encerrarSerie
 Route::patch('/missoes/{missao}/toggle', [TasksController::class, 'toggle'])->name('missoes.toggle')->middleware('auth');
 Route::patch('/missoes/{missao}/transferir', [TasksController::class, 'transferir'])->name('missoes.transferir')->middleware('auth');
 
+// declarada antes do resource: "resgates" não pode ser lido como {recompensa}
+Route::delete('/recompensas/resgates/{resgate}', [RewardController::class, 'desfazer'])->name('recompensas.desfazer')->middleware('auth');
 Route::resource('/recompensas', RewardController::class)->except(['create', 'show'])->parameters(['recompensas' => 'recompensa'])->middleware('auth');
 Route::post('/recompensas/{recompensa}/trocar', [RewardController::class, 'trocar'])->name('recompensas.trocar')->middleware('auth');

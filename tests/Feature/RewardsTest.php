@@ -6,6 +6,7 @@ use App\Models\PointTransaction;
 use App\Models\Reward;
 use App\Models\RewardRedemption;
 use App\Models\User;
+use App\Services\RewardService;
 
 describe('acesso', function () {
     it('redirects guests to the login page', function () {
@@ -98,6 +99,44 @@ describe('resgate', function () {
         $reward->update(['cost' => 400]);
 
         expect(RewardRedemption::sole()->cost_paid)->toBe(100);
+    });
+});
+
+describe('desfazer resgate', function () {
+    it('refunds the frozen cost and deletes the redemption and its ledger entry', function () {
+        $user = User::factory()->create(['ouro' => 500, 'xp_total' => 40]);
+        $this->actingAs($user);
+        $reward = Reward::factory()->create(['cost' => 100]);
+        $this->post(route('recompensas.trocar', $reward));
+        $reward->update(['cost' => 400]);
+        $user->refresh(); // o resgate mexeu no banco; na requisição real o usuário já vem fresco
+
+        $this->delete(route('recompensas.desfazer', RewardRedemption::sole()))
+            ->assertRedirect(route('recompensas.index', ['aba' => 'historico']))
+            ->assertSessionHas('ouro_anterior', 400);
+
+        expect($user->refresh())->ouro->toBe(500)->xp_total->toBe(40);
+        expect(RewardRedemption::count())->toBe(0)->and(PointTransaction::count())->toBe(0);
+    });
+
+    it('brings a one-time reward back to the store', function () {
+        $this->actingAs(User::factory()->create(['ouro' => 500]));
+        $reward = Reward::factory()->single()->create(['name' => 'Viagem', 'cost' => 100]);
+        $this->post(route('recompensas.trocar', $reward));
+        expect(app(RewardService::class)->listar(1000))->toHaveCount(0);
+
+        $this->delete(route('recompensas.desfazer', RewardRedemption::sole()));
+
+        expect(app(RewardService::class)->listar(1000))->toHaveCount(1);
+    });
+
+    it('redirects guests to the login page', function () {
+        $reward = Reward::factory()->create();
+        $resgate = $reward->redemptions()->create(['cost_paid' => 10, 'redeemed_at' => now()]);
+
+        $this->delete(route('recompensas.desfazer', $resgate))->assertRedirect(route('login.index'));
+
+        expect(RewardRedemption::count())->toBe(1);
     });
 });
 

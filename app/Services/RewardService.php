@@ -92,6 +92,23 @@ class RewardService
         });
     }
 
+    /**
+     * Desfaz um resgate: devolve o ouro pago (custo congelado) e apaga o resgate e seu lançamento.
+     * Diferente do estorno de missões, aqui nada fica no histórico, por pedido do dono.
+     */
+    public function desfazerResgate(RewardRedemption $resgate, User $user): void
+    {
+        DB::transaction(function () use ($resgate, $user) {
+            $user = User::query()->lockForUpdate()->findOrFail($user->id);
+
+            $user->ouro += $resgate->cost_paid;
+            $user->save();
+
+            $resgate->pointTransaction()->delete();
+            $resgate->delete();
+        });
+    }
+
     /** @param  array<string, mixed>  $dados */
     public function criar(array $dados): Reward
     {

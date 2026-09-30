@@ -7,7 +7,7 @@
     $recompensas   Collection<Reward> (name, description, cost, rank)
                    ordem: disponíveis (mais baratas) → bloqueadas (mais baratas)
     $historico     Collection de ['mes' => Carbon, 'total' => int, 'trocas' => Collection<RewardRedemption>]  (reward->name, cost_paid, redeemed_at)
-  Rotas: recompensas.trocar (POST {recompensa}) · recompensas.store · recompensas.edit
+  Rotas: recompensas.trocar (POST {recompensa}) · recompensas.store · recompensas.edit · recompensas.desfazer (DELETE {resgate})
 --}}
 <x-layouts.app title="Loja">
     <x-sys.page-header label="Loja do Sistema" title="Loja">
@@ -76,6 +76,13 @@
                                 <time datetime="{{ $t->redeemed_at->toIso8601String() }}" class="text-xs text-ink-muted">{{ $t->redeemed_at->translatedFormat('d/m · H:i') }}</time>
                             </span>
                             <span class="font-display text-sm font-semibold tabular text-gold">−{{ number_format($t->cost_paid, 0, ',', '.') }}</span>
+                            <form method="POST" action="{{ route('recompensas.desfazer', $t) }}" data-sys-form
+                                  data-confirm="Desfazer o resgate de “{{ $t->reward->name }}”? Você recebe {{ number_format($t->cost_paid, 0, ',', '.') }} Ouro de volta e o registro é apagado."
+                                  data-confirm-ok="Desfazer">
+                                @csrf
+                                @method('DELETE')
+                                <x-sys.icon-button type="submit" icon="undo" :label="'Desfazer resgate de '.$t->reward->name" />
+                            </form>
                         </li>
                     @endforeach
                 </x-sys.window>

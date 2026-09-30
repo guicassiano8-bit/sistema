@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RewardStoreRequest;
 use App\Http\Requests\RewardUpdateRequest;
 use App\Models\Reward;
+use App\Models\RewardRedemption;
 use App\Services\RewardService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -54,6 +55,24 @@ class RewardController extends Controller
 
         return redirect()->route('recompensas.index')
             ->with('sys_toast', ['type' => 'info', 'title' => $apagada ? 'Recompensa excluída' : 'Recompensa desativada', 'message' => $recompensa->name]);
+    }
+
+    public function desfazer(Request $request, RewardRedemption $resgate): RedirectResponse
+    {
+        $ouroAnterior = $request->user()->ouro;
+        $nome = $resgate->reward->name;
+        $valor = $resgate->cost_paid;
+
+        $this->rewards->desfazerResgate($resgate, $request->user());
+
+        return redirect()->route('recompensas.index', ['aba' => 'historico'])
+            ->with('ouro_anterior', $ouroAnterior)
+            ->with('sys_toast', [
+                'type' => 'info',
+                'title' => 'Resgate desfeito',
+                'message' => $nome,
+                'value' => '+'.number_format($valor, 0, ',', '.').' Ouro',
+            ]);
     }
 
     public function trocar(Request $request, Reward $recompensa): RedirectResponse
