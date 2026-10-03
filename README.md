@@ -1,59 +1,82 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistema
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema pessoal de produtividade e finanças, com a interface de uma janela de progressão. Um único jogador entra, cumpre missões e troca o ouro ganho por recompensas que ele mesmo cadastrou.
 
-## About Laravel
+A interface está em português do Brasil. Datas no formato `dd/mm/aaaa`, valores em real (`R$ 1.234,56`) e fuso `America/Sao_Paulo`.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Como funciona
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Existem duas moedas, com papéis diferentes:
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| | XP | Ouro |
+|---|---|---|
+| Serve para | Subir de nível e de rank | Comprar recompensas na loja |
+| Pode diminuir? | Só no estorno de uma missão desmarcada | Sim, ao resgatar uma recompensa |
 
-## Learning Laravel
+Concluir uma missão concede o XP e o ouro definidos nela. Desmarcar devolve os dois. O nível não fica gravado: é calculado a partir do XP total. Cada nível pede `100 × nível` de XP para o próximo. O rank segue a faixa de nível: E (1–9), D (10–19), C (20–29), B (30–39), A (40–49) e S (50+).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Toda movimentação de XP e ouro fica registrada, para auditoria e estorno. Resgatar uma recompensa sem ouro suficiente é recusado no servidor.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Módulos
 
-## Laravel Sponsors
+Os nomes temáticos existem só na interface. No código, models e tabelas usam nomes literais em inglês (`Task`, `Reward`, `ShoppingItem`, `Transaction`).
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Tela | O que é | Estado |
+|---|---|---|
+| **Status** | Painel do dia: missões de hoje, progresso e XP ganho | Em uso |
+| **Missões** | Tarefas avulsas e recorrentes, com visões de dia, semana, mês e ano. Uma ocorrência pode ser transferida de dia sem alterar a regra | Em uso |
+| **Loja** | Recompensas cadastradas pelo jogador, compradas com ouro, com histórico de resgates | Em uso |
+| **Inventário** | Lista de compras. A categoria aparece como raridade: Urgente, Importante, Dia a dia, Não importante | Modelo pronto; tela ainda não ligada |
+| **Tesouro** | Ganhos, gastos, orçamentos e investimentos. O financeiro não gera XP nem ouro | Modelo pronto; tela ainda não ligada |
 
-### Premium Partners
+O acesso é só por login. Não há cadastro público nem recuperação de senha: a conta é criada pelo seeder, a partir do `.env`.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Stack
 
-## Contributing
+- PHP 8.4+ e [Laravel 13](https://laravel.com/docs/13.x)
+- Blade, Tailwind CSS v4 e JavaScript puro, empacotados com Vite
+- Banco padrão: SQLite. MySQL também serve, ajustando o `.env`
+- Testes com [Pest](https://pestphp.com)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Como rodar
 
-## Code of Conduct
+Requisitos: PHP 8.4+, Composer, Node.js e npm.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+composer install
+cp .env.example .env
+php artisan key:generate
+```
 
-## Security Vulnerabilities
+No `.env`, defina a conta do jogador. A senha precisa ter pelo menos 12 caracteres.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```dotenv
+ADMIN_NAME=Jogador
+ADMIN_EMAIL=jogador@example.com
+ADMIN_PASSWORD=uma-senha-longa
+```
 
-## License
+Depois:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan migrate
+php artisan db:seed
+npm install
+npm run dev
+```
+
+Em outro terminal:
+
+```bash
+php artisan serve
+```
+
+O `composer run dev` sobe o servidor, a fila, os logs e o Vite juntos. O `composer run setup` instala dependências, gera a chave, migra e faz o build de produção — o seed da conta continua sendo um passo à parte.
+
+Acesse `http://localhost:8000` e entre com o e-mail e a senha do `.env`.
+
+## Testes
+
+```bash
+php artisan test
+```
