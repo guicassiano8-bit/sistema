@@ -57,10 +57,10 @@ class FinanceService
             // ativos (Parte 4)
             'posicoes' => $aba === FinanceTab::Assets ? $this->investments->carteira() : collect(),
 
-            // relatórios
-            'serie12m' => [],
-            'fluxo6m' => ['labels' => [], 'ganhos' => [], 'gastos' => []],
-            'porCategoria' => [],
+            // relatórios (Parte 6)
+            ...($aba === FinanceTab::Reports
+                ? $this->reports->relatorios(today())
+                : ['serie12m' => [], 'fluxo6m' => ['labels' => [], 'ganhos' => [], 'gastos' => []], 'porCategoria' => []]),
         ];
     }
 

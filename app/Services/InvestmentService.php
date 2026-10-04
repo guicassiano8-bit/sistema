@@ -10,6 +10,7 @@ use App\Models\AssetBalanceUpdate;
 use App\Models\AssetType;
 use App\Models\IncomeEntry;
 use App\Models\InvestmentTransaction;
+use App\Models\PortfolioSnapshot;
 use App\Models\Quote;
 use App\Support\AssetPosition;
 use App\Support\Money;
@@ -58,8 +59,40 @@ class InvestmentService
             ->reduce(fn (BigDecimal $soma, Asset $asset) => $soma->plus($this->valorEm($asset, $ate)), $zero);
     }
 
+    /**
+     * Grava (ou atualiza) a fotografia do mês de cada ativo ativo: quanto estava aplicado e quanto valia.
+     * Mês corrente usa os valores de hoje; mês passado, os do último dia dele. Rodar de novo corrige.
+     *
+     * @return int quantidade de ativos fotografados
+     */
+    public function fotografar(CarbonInterface $mes): int
+    {
+        $referencia = $mes->copy()->startOfMonth();
+        $data = $referencia->isSameMonth(today()) ? today() : $referencia->copy()->endOfMonth();
+        $ativos = Asset::query()->active()->with('assetType')->get();
+
+        foreach ($ativos as $asset) {
+            ['invested' => $aplicado, 'value' => $valor] = $this->posicaoEm($asset, $data);
+
+            PortfolioSnapshot::updateOrCreate(
+                ['asset_id' => $asset->id, 'reference_month' => $referencia],
+                ['invested_amount' => $aplicado, 'market_value' => $valor],
+            );
+        }
+
+        return $ativos->count();
+    }
+
     /** Mesma regra de posicao(), olhando só o que existia até o fim de $data. */
     private function valorEm(Asset $asset, CarbonInterface $data): BigDecimal
+    {
+        return $this->posicaoEm($asset, $data)['value'];
+    }
+
+    /**
+     * @return array{invested: BigDecimal, value: BigDecimal}
+     */
+    private function posicaoEm(Asset $asset, CarbonInterface $data): array
     {
         $fim = $data->copy()->endOfDay();
         $transacoes = $this->ordenar($asset->transactions()->where('date', '<=', $fim)->get());
@@ -68,21 +101,24 @@ class InvestmentService
             ['quantity' => $quantidade, 'cost' => $custo] = $this->estado($transacoes);
             $preco = $asset->quotes()->where('date', '<=', $fim)->orderByDesc('date')->value('price');
 
-            return $preco === null ? $custo : $quantidade->multipliedBy($preco)->toScale(2, RoundingMode::HalfUp);
-        }
-
-        $saldo = $asset->balanceUpdates()->where('reference_date', '<=', $fim)->orderByDesc('reference_date')->value('gross_balance');
-
-        if ($saldo !== null) {
-            return BigDecimal::of($saldo)->toScale(2, RoundingMode::HalfUp);
+            return [
+                'invested' => $custo,
+                'value' => $preco === null ? $custo : $quantidade->multipliedBy($preco)->toScale(2, RoundingMode::HalfUp),
+            ];
         }
 
         $aplicado = BigDecimal::zero()->toScale(2);
         foreach ($transacoes as $t) {
             $aplicado = $t->type->isInflow() ? $aplicado->plus($t->total) : $aplicado->minus($t->total);
         }
+        $aplicado = BigDecimal::max($aplicado, BigDecimal::zero())->toScale(2);
 
-        return BigDecimal::max($aplicado, BigDecimal::zero())->toScale(2);
+        $saldo = $asset->balanceUpdates()->where('reference_date', '<=', $fim)->orderByDesc('reference_date')->value('gross_balance');
+
+        return [
+            'invested' => $aplicado,
+            'value' => $saldo !== null ? BigDecimal::of($saldo)->toScale(2, RoundingMode::HalfUp) : $aplicado,
+        ];
     }
 
     /** Usa só as relações já carregadas (o modo estrito do Eloquent proíbe lazy loading). */

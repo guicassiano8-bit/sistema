@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Account;
 use App\Models\InvestmentTransaction;
+use App\Models\Transaction;
 use App\Models\Transfer;
 use Brick\Math\BigDecimal;
 use Brick\Math\RoundingMode;
@@ -39,11 +40,28 @@ class AccountBalanceService
             ->toScale(2, RoundingMode::HalfUp);
     }
 
-    /** Soma dos saldos das contas ativas, sem os investimentos. */
+    /**
+     * Soma dos saldos das contas ativas, sem os investimentos. Mesma regra de saldoDaConta(),
+     * mas agregada: o número de consultas não cresce com o número de contas.
+     */
     public function saldoTotal(?CarbonInterface $ate = null): BigDecimal
     {
-        return Account::query()->active()->get()
-            ->reduce(fn (BigDecimal $soma, Account $conta) => $soma->plus($this->saldoDaConta($conta, $ate)), BigDecimal::zero()->toScale(2));
+        $ids = Account::query()->active()->pluck('id');
+        $fim = $ate?->copy()->endOfDay();
+        $limitar = fn ($query) => $query->when($fim, fn ($q) => $q->where('date', '<=', $fim));
+
+        $inicial = $this->somar(Account::query()->whereIn('id', $ids)->sum('initial_balance'));
+        $ganhos = $this->somar($limitar(Transaction::query()->income()->paid()->whereIn('account_id', $ids))->sum('amount'));
+        $gastos = $this->somar($limitar(Transaction::query()->expense()->paid()->whereIn('account_id', $ids))->sum('amount'));
+        $recebido = $this->somar($limitar(Transfer::query()->whereIn('to_account_id', $ids))->sum('amount'));
+        $enviado = $this->somar($limitar(Transfer::query()->whereIn('from_account_id', $ids))->sum('amount'));
+        $aportado = $this->somar($limitar(InvestmentTransaction::query()->inflows()->whereIn('account_id', $ids))->sum('total'));
+        $resgatado = $this->somar($limitar(InvestmentTransaction::query()->outflows()->whereIn('account_id', $ids))->sum('total'));
+
+        return $inicial->plus($ganhos)->minus($gastos)
+            ->plus($recebido)->minus($enviado)
+            ->minus($aportado)->plus($resgatado)
+            ->toScale(2, RoundingMode::HalfUp);
     }
 
     /** O SQLite (testes) devolve float no SUM; arredondar evita ruído como 0.30000000000000004. */

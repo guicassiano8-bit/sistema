@@ -9,3 +9,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('missoes:gerar-recorrentes')->daily();
+
+// Todo dia, perto da meia-noite: o do último dia do mês é o que fica como fotografia do mês fechado.
+Schedule::command('finance:snapshot')->dailyAt('23:55');
