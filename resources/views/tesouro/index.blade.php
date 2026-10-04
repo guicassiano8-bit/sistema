@@ -20,6 +20,11 @@ $abas = \App\Enums\FinanceTab::options();
 
     @include('tesouro.abas.' . $aba)
 
+    <nav aria-label="Cadastros" class="grid grid-cols-2 gap-2">
+        <x-sys.button variant="ghost" icon="coins" :href="route('tesouro.contas.index')">Contas</x-sys.button>
+        <x-sys.button variant="ghost" icon="gem" :href="route('tesouro.categorias.index')">Categorias</x-sys.button>
+    </nav>
+
     <x-slot:fab><x-sys.fab label="Lançar gasto" icon="minus" variant="danger" modal="modal-gasto" /></x-slot:fab>
 
     <x-slot:modals>

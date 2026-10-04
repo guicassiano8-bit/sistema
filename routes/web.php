@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\FinanceCategoryController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RewardController;
@@ -36,3 +38,7 @@ Route::patch('/inventario/{item}/toggle', [ShoppingController::class, 'toggle'])
 Route::get('/tesouro', [FinanceController::class, 'index'])->name('tesouro.index')->middleware('auth');
 Route::resource('/tesouro/lancamentos', TransactionController::class)->only(['store', 'edit', 'update', 'destroy'])
     ->parameters(['lancamentos' => 'lancamento'])->names('tesouro.lancamentos')->middleware('auth');
+Route::resource('/tesouro/contas', AccountController::class)->except(['create', 'show'])
+    ->parameters(['contas' => 'conta'])->names('tesouro.contas')->middleware('auth');
+Route::resource('/tesouro/categorias', FinanceCategoryController::class)->except(['create', 'show'])
+    ->parameters(['categorias' => 'categoria'])->names('tesouro.categorias')->middleware('auth');

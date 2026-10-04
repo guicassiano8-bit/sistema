@@ -9,12 +9,14 @@ use Brick\Math\RoundingMode;
 class Money
 {
     /**
-     * "1.234,56", "R$ 42,9", "42.90" ou "1.234" → string decimal ("1234.56", "42.9", "42.90", "1234").
+     * "1.234,56", "R$ 42,9", "-10,50", "42.90" ou "1.234" → string decimal ("1234.56", "42.9", "42.90", "1234").
      * Retorna o texto original se não parecer um valor, para a validação acusar o erro.
      */
     public static function parse(string $valor): string
     {
-        $limpo = trim(str_replace(['R$', "\u{00A0}", ' '], '', $valor));
+        $limpo = trim(str_replace(['R$', "\u{00A0}", ' ', "\u{2212}"], ['', '', '', '-'], $valor));
+        $sinal = str_starts_with($limpo, '-') ? '-' : '';
+        $limpo = ltrim($limpo, '-');
 
         if (str_contains($limpo, ',')) {
             $limpo = str_replace(',', '.', str_replace('.', '', $limpo));
@@ -23,7 +25,7 @@ class Money
             $limpo = str_replace('.', '', $limpo);
         }
 
-        return preg_match('/^\d+(\.\d+)?$/', $limpo) ? $limpo : $valor;
+        return preg_match('/^\d+(\.\d+)?$/', $limpo) ? $sinal.$limpo : $valor;
     }
 
     /** "1234.5" → "R$ 1.234,50". */
