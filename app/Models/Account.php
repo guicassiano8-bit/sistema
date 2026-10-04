@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\AccountType;
+use Database\Factories\AccountFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -13,6 +15,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Account extends Model
 {
+    /** @use HasFactory<AccountFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'type',

@@ -4,13 +4,18 @@ namespace App\Models;
 
 use App\Enums\IncomeType;
 use Carbon\CarbonInterface;
+use Database\Factories\IncomeEntryFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /** Rendimentos: dividendos de FII, juros, JCP. */
 class IncomeEntry extends Model
 {
+    /** @use HasFactory<IncomeEntryFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'asset_id',
         'reference_month',

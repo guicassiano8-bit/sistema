@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RewardController;
 use App\Http\Controllers\ShoppingController;
@@ -30,3 +31,5 @@ Route::post('/recompensas/{recompensa}/trocar', [RewardController::class, 'troca
 Route::delete('/inventario/comprados', [ShoppingController::class, 'limpar'])->name('inventario.limpar')->middleware('auth');
 Route::resource('/inventario', ShoppingController::class)->except(['create', 'show'])->parameters(['inventario' => 'item'])->middleware('auth');
 Route::patch('/inventario/{item}/toggle', [ShoppingController::class, 'toggle'])->name('inventario.toggle')->middleware('auth');
+
+Route::get('/tesouro', [FinanceController::class, 'index'])->name('tesouro.index')->middleware('auth');

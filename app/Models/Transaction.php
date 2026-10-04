@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
-use Brick\Math\BigDecimal;
 use App\Enums\PaymentMethod;
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
+use Brick\Math\BigDecimal;
 use Carbon\CarbonInterface;
+use Database\Factories\TransactionFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,6 +19,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /** Ganhos e gastos. amount é sempre positivo; o sinal vem de type. */
 class Transaction extends Model
 {
+    /** @use HasFactory<TransactionFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'account_id',
         'finance_category_id',

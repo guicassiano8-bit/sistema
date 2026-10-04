@@ -3,12 +3,17 @@
 namespace App\Models;
 
 use App\Enums\InvestmentTransactionType;
+use Database\Factories\InvestmentTransactionFactory;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InvestmentTransaction extends Model
 {
+    /** @use HasFactory<InvestmentTransactionFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'asset_id',
         'account_id',

@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\AssetBalanceUpdateFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /** Saldo lançado à mão, com o valor que o banco mostra. */
 class AssetBalanceUpdate extends Model
 {
+    /** @use HasFactory<AssetBalanceUpdateFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'asset_id',
         'reference_date',
