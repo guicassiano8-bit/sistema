@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Enums\FinanceTab;
+use App\Enums\Indexer;
 use App\Enums\TransactionType;
+use App\Models\Account;
 use App\Models\Asset;
 use App\Models\FinanceCategory;
 use Carbon\Carbon;
@@ -11,7 +13,10 @@ use Illuminate\Support\Collection;
 
 class FinanceService
 {
-    public function __construct(private TransactionService $transactions) {}
+    public function __construct(
+        private TransactionService $transactions,
+        private InvestmentService $investments,
+    ) {}
 
     /** Cai em Resumo quando ?aba= está ausente ou é desconhecida, em vez de dar erro. */
     public function abaDaRequisicao(?string $aba): FinanceTab
@@ -34,6 +39,8 @@ class FinanceService
             'aba' => $aba->value,
             'categorias' => $this->categoriasParaSelect(),
             'investimentos' => Asset::query()->active()->with('assetType')->orderBy('name')->get(),
+            'contas' => Account::query()->active()->orderBy('name')->pluck('name', 'id')->all(),
+            'indexadores' => Indexer::options(),
 
             // resumo
             'resumo' => ['patrimonio' => 0, 'delta_pct' => 0, 'ganhos_mes' => 0, 'gastos_mes' => 0, 'passivo_mes' => 0],
@@ -45,6 +52,9 @@ class FinanceService
             ...($aba === FinanceTab::Statement
                 ? $this->transactions->extrato($mes, $filtro)
                 : ['porDia' => collect(), 'totais' => ['entradas' => 0, 'saidas' => 0]]),
+
+            // ativos (Parte 4)
+            'posicoes' => $aba === FinanceTab::Assets ? $this->investments->carteira() : collect(),
 
             // relatórios
             'serie12m' => [],

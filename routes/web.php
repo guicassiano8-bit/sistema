@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AssetController;
 use App\Http\Controllers\FinanceCategoryController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\IncomeEntryController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RewardController;
 use App\Http\Controllers\ShoppingController;
@@ -42,3 +44,9 @@ Route::resource('/tesouro/contas', AccountController::class)->except(['create', 
     ->parameters(['contas' => 'conta'])->names('tesouro.contas')->middleware('auth');
 Route::resource('/tesouro/categorias', FinanceCategoryController::class)->except(['create', 'show'])
     ->parameters(['categorias' => 'categoria'])->names('tesouro.categorias')->middleware('auth');
+Route::resource('/tesouro/investimentos', AssetController::class)->except(['index', 'create', 'show'])
+    ->parameters(['investimentos' => 'investimento'])->names('tesouro.investimentos')->middleware('auth');
+Route::post('/tesouro/investimentos/{investimento}/movimentos', [AssetController::class, 'movimento'])->name('tesouro.investimentos.movimentos.store')->middleware('auth');
+Route::post('/tesouro/investimentos/{investimento}/valor', [AssetController::class, 'valor'])->name('tesouro.investimentos.valor.store')->middleware('auth');
+Route::post('/tesouro/rendimentos', [IncomeEntryController::class, 'store'])->name('tesouro.rendimentos.store')->middleware('auth');
+Route::delete('/tesouro/rendimentos/{rendimento}', [IncomeEntryController::class, 'destroy'])->name('tesouro.rendimentos.destroy')->middleware('auth');
