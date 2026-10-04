@@ -4,8 +4,8 @@
 
   Dados (sempre):  $aba · $categorias (['gasto' => [valor => rótulo], 'ganho' => [...]] para os modais de lançamento) · $investimentos (para o modal de rendimento)
   Por aba — ver o topo de cada arquivo em tesouro/abas/.
-  Lancamento: descricao, categoria, valor (NEGATIVO = gasto), data (date)
-  Rotas: tesouro.lancamentos.store · tesouro.investimentos.store · tesouro.rendimentos.store
+  Lançamento: Transaction (amount sempre positivo; o sinal vem de type), com category carregada
+  Rotas: tesouro.lancamentos.* · tesouro.investimentos.store · tesouro.rendimentos.store (as duas últimas na Parte 4)
 --}}
 @php
 $abas = \App\Enums\FinanceTab::options();
@@ -20,15 +20,11 @@ $abas = \App\Enums\FinanceTab::options();
 
     @include('tesouro.abas.' . $aba)
 
-    @if (Route::has('tesouro.lancamentos.store'))
-        <x-slot:fab><x-sys.fab label="Lançar gasto" icon="minus" variant="danger" modal="modal-gasto" /></x-slot:fab>
-    @endif
+    <x-slot:fab><x-sys.fab label="Lançar gasto" icon="minus" variant="danger" modal="modal-gasto" /></x-slot:fab>
 
     <x-slot:modals>
-        @if (Route::has('tesouro.lancamentos.store'))
-            @include('tesouro._modal-lancamento', ['tipo' => 'gasto'])
-            @include('tesouro._modal-lancamento', ['tipo' => 'ganho'])
-        @endif
+        @include('tesouro._modal-lancamento', ['tipo' => 'gasto'])
+        @include('tesouro._modal-lancamento', ['tipo' => 'ganho'])
 
         @if (Route::has('tesouro.investimentos.store'))
         {{-- NOVO INVESTIMENTO --}}

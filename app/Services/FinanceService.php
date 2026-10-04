@@ -11,6 +11,8 @@ use Illuminate\Support\Collection;
 
 class FinanceService
 {
+    public function __construct(private TransactionService $transactions) {}
+
     /** Cai em Resumo quando ?aba= está ausente ou é desconhecida, em vez de dar erro. */
     public function abaDaRequisicao(?string $aba): FinanceTab
     {
@@ -25,6 +27,9 @@ class FinanceService
      */
     public function dadosDaTela(FinanceTab $aba, ?string $mes = null, ?string $filtro = null): array
     {
+        $mes = $this->mesEmFoco($mes);
+        $filtro = in_array($filtro, ['todos', 'ganhos', 'gastos'], true) ? $filtro : 'todos';
+
         return [
             'aba' => $aba->value,
             'categorias' => $this->categoriasParaSelect(),
@@ -34,11 +39,12 @@ class FinanceService
             'resumo' => ['patrimonio' => 0, 'delta_pct' => 0, 'ganhos_mes' => 0, 'gastos_mes' => 0, 'passivo_mes' => 0],
             'ultimos' => collect(),
 
-            // extrato
-            'mes' => $this->mesEmFoco($mes),
-            'filtro' => in_array($filtro, ['todos', 'ganhos', 'gastos'], true) ? $filtro : 'todos',
-            'porDia' => collect(),
-            'totais' => ['entradas' => 0, 'saidas' => 0],
+            // extrato (Parte 2)
+            'mes' => $mes,
+            'filtro' => $filtro,
+            ...($aba === FinanceTab::Statement
+                ? $this->transactions->extrato($mes, $filtro)
+                : ['porDia' => collect(), 'totais' => ['entradas' => 0, 'saidas' => 0]]),
 
             // relatórios
             'serie12m' => [],

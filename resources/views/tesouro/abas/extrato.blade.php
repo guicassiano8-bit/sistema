@@ -1,8 +1,8 @@
 {{--
   ABA EXTRATO
   $mes          Carbon (mês em foco)          $filtro 'todos'|'ganhos'|'gastos'
-  $porDia       Collection 'Y-m-d' => Collection<Lancamento> (dias mais recentes primeiro)
-  $totais       ['entradas' => float, 'saidas' => float (positivo)]
+  $porDia       Collection 'Y-m-d' => Collection<Transaction> (dias mais recentes primeiro)
+  $totais       ['entradas' => string, 'saidas' => string (positivo)] — só lançamentos pagos, mês inteiro
 --}}
 @php
 $url = fn ($m, $f = null) => route('tesouro.index', ['aba' => 'extrato', 'mes' => $m->format('Y-m'), 'filtro' => $f ?? $filtro]);
@@ -30,7 +30,7 @@ $url = fn ($m, $f = null) => route('tesouro.index', ['aba' => 'extrato', 'mes' =
     <section aria-labelledby="dia-{{ $dia }}" class="flex flex-col gap-2">
         <h3 id="dia-{{ $dia }}" class="flex items-baseline justify-between">
             <span class="sys-label">{{ $d->isToday() ? 'Hoje' : ($d->isYesterday() ? 'Ontem' : $d->translatedFormat('D, d M')) }}</span>
-            <x-sys.money :value="$lancs->sum('valor')" signed class="text-xs" />
+            <x-sys.money :value="$lancs->filter(fn ($t) => $t->status === \App\Enums\TransactionStatus::Paid)->sum('signed_amount')" signed class="text-xs" />
         </h3>
         <x-sys.window as="ul" padding="none" :scan="false" class="divide-y divide-line-subtle">
             @foreach ($lancs as $l)

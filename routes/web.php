@@ -6,6 +6,7 @@ use App\Http\Controllers\RewardController;
 use App\Http\Controllers\ShoppingController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TasksController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LoginController::class, 'index'])->name('login.index')->middleware('guest');
@@ -33,3 +34,5 @@ Route::resource('/inventario', ShoppingController::class)->except(['create', 'sh
 Route::patch('/inventario/{item}/toggle', [ShoppingController::class, 'toggle'])->name('inventario.toggle')->middleware('auth');
 
 Route::get('/tesouro', [FinanceController::class, 'index'])->name('tesouro.index')->middleware('auth');
+Route::resource('/tesouro/lancamentos', TransactionController::class)->only(['store', 'edit', 'update', 'destroy'])
+    ->parameters(['lancamentos' => 'lancamento'])->names('tesouro.lancamentos')->middleware('auth');
