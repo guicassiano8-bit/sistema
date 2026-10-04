@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Task extends Model
@@ -59,6 +60,12 @@ class Task extends Model
     public function recurringTask(): BelongsTo
     {
         return $this->belongsTo(RecurringTask::class);
+    }
+
+    /** Itens do Inventário a comprar nesta missão ("Fazer Compras"). */
+    public function shoppingItems(): HasMany
+    {
+        return $this->hasMany(ShoppingItem::class);
     }
 
     public function pointTransactions(): MorphMany

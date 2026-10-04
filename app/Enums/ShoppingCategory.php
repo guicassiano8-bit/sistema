@@ -38,8 +38,8 @@ enum ShoppingCategory: string
     {
         return match ($this) {
             self::Urgent => 1,
-            self::Daily => 2,
-            self::Important => 3,
+            self::Important => 2,
+            self::Daily => 3,
             self::NotImportant => 4,
         };
     }

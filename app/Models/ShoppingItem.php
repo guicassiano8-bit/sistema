@@ -2,22 +2,29 @@
 
 namespace App\Models;
 
-use Brick\Math\BigDecimal;
 use App\Enums\ShoppingCategory;
 use App\Enums\ShoppingStatus;
+use Brick\Math\BigDecimal;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class ShoppingItem extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'category',
         'estimated_price',
         'quantity',
+        'unit',
+        'scheduled_date',
+        'task_id',
         'link',
         'notes',
         'status',
@@ -39,10 +46,17 @@ class ShoppingItem extends Model
             'actual_price' => 'decimal:2',
             'quantity' => 'integer',
             'purchased_at' => 'datetime',
+            'scheduled_date' => 'date',
         ];
     }
 
     // Relacionamentos
+
+    /** A missão "Fazer Compras" do dia em que o item deve ser comprado. */
+    public function task(): BelongsTo
+    {
+        return $this->belongsTo(Task::class);
+    }
 
     public function rewards(): HasMany
     {

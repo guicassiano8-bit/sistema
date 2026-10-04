@@ -24,7 +24,7 @@ $val = fn ($campo, $atual) => old($campo, $atual);
             <div class="flex flex-col gap-4">
                 <x-sys.input name="name" label="Recompensa" :value="$val('name', $recompensa->name)" required autofocus maxlength="255" />
                 <x-sys.input name="description" label="Descrição" :value="$val('description', $recompensa->description)" hint="Opcional" />
-                <x-sys.input name="cost" label="Custo" type="number" min="1" step="10" suffix="OURO" inputmode="numeric" :value="$val('cost', $recompensa->cost)" required />
+                <x-sys.input name="cost" label="Custo" type="number" min="1" step="1" suffix="OURO" inputmode="numeric" :value="$val('cost', $recompensa->cost)" required />
                 <x-sys.segmented label="Resgate" name="is_repeatable" :value="$recompensa->is_repeatable ? '1' : '0'" :options="['1' => 'Repetível', '0' => 'Única vez']" />
                 <x-sys.segmented label="Peso (rank)" name="rank" :value="$recompensa->rank->value" :options="array_combine(TaskRank::values(), TaskRank::values())" />
                 <label class="flex min-h-tap cursor-pointer items-center gap-3 text-sm text-ink-soft">

@@ -98,7 +98,7 @@
                 @csrf
                 <x-sys.input name="name" label="Recompensa" placeholder="Ex.: Jantar fora" required autofocus :error="$errors->recompensa->first('name')" />
                 <x-sys.input name="description" label="Descrição" placeholder="Opcional" :error="$errors->recompensa->first('description')" />
-                <x-sys.input name="cost" label="Custo" type="number" min="1" step="10" suffix="OURO" inputmode="numeric" required :error="$errors->recompensa->first('cost')" />
+                <x-sys.input name="cost" label="Custo" type="number" min="1" step="1" suffix="OURO" inputmode="numeric" required :error="$errors->recompensa->first('cost')" />
                 <x-sys.segmented label="Resgate" name="is_repeatable" value="1" :options="['1' => 'Repetível', '0' => 'Única vez']" />
                 <x-sys.segmented label="Peso (rank)" name="rank" value="C"
                                  :options="array_combine(\App\Enums\TaskRank::values(), \App\Enums\TaskRank::values())" />

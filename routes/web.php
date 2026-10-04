@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RewardController;
+use App\Http\Controllers\ShoppingController;
 use App\Http\Controllers\StatusController;
 use App\Http\Controllers\TasksController;
 use Illuminate\Support\Facades\Route;
@@ -24,3 +25,8 @@ Route::patch('/missoes/{missao}/transferir', [TasksController::class, 'transferi
 Route::delete('/recompensas/resgates/{resgate}', [RewardController::class, 'desfazer'])->name('recompensas.desfazer')->middleware('auth');
 Route::resource('/recompensas', RewardController::class)->except(['create', 'show'])->parameters(['recompensas' => 'recompensa'])->middleware('auth');
 Route::post('/recompensas/{recompensa}/trocar', [RewardController::class, 'trocar'])->name('recompensas.trocar')->middleware('auth');
+
+// declarada antes do resource: "comprados" não pode ser lido como {item}
+Route::delete('/inventario/comprados', [ShoppingController::class, 'limpar'])->name('inventario.limpar')->middleware('auth');
+Route::resource('/inventario', ShoppingController::class)->except(['create', 'show'])->parameters(['inventario' => 'item'])->middleware('auth');
+Route::patch('/inventario/{item}/toggle', [ShoppingController::class, 'toggle'])->name('inventario.toggle')->middleware('auth');

@@ -83,6 +83,8 @@ const Sistema = (() => {
      Todo [data-progress-scope] acima do card recebe ±1 em [data-progress-done],
      ±xp em [data-progress-xp] e recalcula [data-progress-bar] / [data-progress-fill]. */
   function bumpProgress(card, done) {
+    // itens do Inventário dentro do card de uma missão não contam como missão concluída
+    if (!card.matches('[data-mission]')) return;
     const d = done ? 1 : -1;
     const xpCard = Number(card.dataset.xp || 0);
     let scope = card.closest('[data-progress-scope]');
@@ -169,9 +171,17 @@ const Sistema = (() => {
     card.dataset.busy = '';
     const wasDone = card.dataset.state === 'done';
     const btn = $('button[aria-pressed]', form);
+    // missão "Fazer Compras": concluir marca todos os itens do card; o estado anterior serve ao rollback
+    const itens = kind === 'mission' ? $$('[data-inventory-item]', card) : [];
+    const estadoItens = itens.map((it) => it.dataset.state);
+    const setItens = (estados) => itens.forEach((it, i) => {
+      it.dataset.state = estados[i];
+      $('button[aria-pressed]', it)?.setAttribute('aria-pressed', String(estados[i] === 'done'));
+    });
     const apply = (done) => {
       card.dataset.state = done ? 'done' : 'pending';
       btn.setAttribute('aria-pressed', String(done));
+      setItens(itens.map(() => (done ? 'done' : 'pending')));
       if (done) { card.dataset.justDone = ''; setTimeout(() => delete card.dataset.justDone, 650); }
     };
     apply(!wasDone);                                   // otimista: resposta visual em 0 ms
@@ -195,9 +205,22 @@ const Sistema = (() => {
         if (data.toast) toast(data.toast);
         else if (!wasDone) toast({ type: 'success', title: 'Missão concluída', message: card.dataset.title, value: `+${card.dataset.xp} XP` });
         if (data.leveled_up) document.dispatchEvent(new CustomEvent('sistema:levelup', { detail: data.player }));
+      } else if (data.mission) {
+        // item que completou (ou desfez) a missão "Fazer Compras" do card
+        const missao = card.closest('[data-mission]');
+        if (missao && (missao.dataset.state === 'done') !== data.mission.done) {
+          missao.dataset.state = data.mission.done ? 'done' : 'pending';
+          $('[data-mission-toggle] button[aria-pressed]', missao)?.setAttribute('aria-pressed', String(data.mission.done));
+          bumpProgress(missao, data.mission.done);
+          if (data.mission.done) floatXp($('[data-mission-toggle] button', missao), Number(missao.dataset.xp || 0), Number(missao.dataset.gold || 0));
+        }
+        xp.player(data.player);
+        if (data.toast) toast(data.toast);
+        if (data.leveled_up) document.dispatchEvent(new CustomEvent('sistema:levelup', { detail: data.player }));
       }
     } catch (e) {
       apply(wasDone);                                  // desfaz
+      setItens(estadoItens);
       bumpProgress(card, wasDone);
       toast({ type: 'danger', title: 'Falha na conexão', message: 'Não foi possível salvar. Tente de novo.' });
     } finally {

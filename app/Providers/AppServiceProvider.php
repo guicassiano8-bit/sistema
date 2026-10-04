@@ -2,15 +2,17 @@
 
 namespace App\Providers;
 
-use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\View;
-use Illuminate\Support\ServiceProvider;
 use App\Models\RewardRedemption;
 use App\Models\ShoppingItem;
 use App\Models\Task;
+use App\Models\User;
+use App\Services\ShoppingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -32,7 +34,7 @@ class AppServiceProvider extends ServiceProvider
             $user = Auth::user();
 
             $view->with('jogador', $user->jogador());
-
+            $view->with('navBadges', ['inventario' => app(ShoppingService::class)->urgentesPendentes()]);
         });
 
         // Grava "task" em source_type em vez de "App\Models\Task".
@@ -47,7 +49,7 @@ class AppServiceProvider extends ServiceProvider
         // - uma relação é carregada dentro de um loop (N+1) sem with();
         // - um atributo fora do $fillable é preenchido;
         // - um atributo que não existe é lido.
-        /** @var \Illuminate\Foundation\Application $app */
+        /** @var Application $app */
         $app = $this->app;
         Model::shouldBeStrict(! $app->isProduction());
     }

@@ -15,6 +15,7 @@
   Rotas esperadas:  PATCH toggle  ·  PATCH transferir (campo "data" Y-m-d)  ·  DELETE destroy
   Sem JS o form funciona normal; com JS (sistema.js) vira fetch + toast + XP animado.
   Slot opcional <x-slot:menu> substitui os itens do menu ⋮.
+  Slot opcional <x-slot:items> (com o prop items-label) mostra uma lista recolhível abaixo do card.
 --}}
 @props([
     'title',
@@ -30,6 +31,7 @@
     'transferUrl' => null,
     'editUrl' => null,
     'deleteUrl' => null,
+    'itemsLabel' => 'Itens',
 ])
 
 @php
@@ -41,7 +43,7 @@ $tomorrow = now()->addDay()->format('Y-m-d');
          @if ($overdue) data-overdue @endif
          data-xp="{{ $xp }}" data-gold="{{ $gold ?? 0 }}" data-title="{{ $title }}"
          {{ $attributes->class([
-             'chamfer group flex items-center gap-1 py-1 pl-1 pr-0 transition-opacity duration-160 has-[details[open]]:z-20',
+             'chamfer group flex flex-wrap items-center gap-1 py-1 pl-1 pr-0 transition-opacity duration-160 has-[details[open]]:z-20',
              '[--ch:8px] [--ch-bg:#0B1220]',
              'data-[state=pending]:data-[overdue]:[--ch-border:rgba(244,63,94,0.55)]',
              'data-[state=done]:[--ch-border:rgba(96,165,250,0.18)] data-[state=done]:opacity-80',
@@ -132,4 +134,17 @@ $tomorrow = now()->addDay()->format('Y-m-d');
             @endisset
         </div>
     </details>
+
+    {{-- 5 · ITENS (opcional) — lista recolhida em largura total, abaixo da linha da missão --}}
+    @isset($items)
+        <details class="group/itens basis-full pb-1 pl-1 pr-2">
+            <summary class="flex min-h-tap cursor-pointer list-none items-center gap-2 pl-1 font-display text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft [&::-webkit-details-marker]:hidden">
+                <x-sys.icon name="chevron-right" size="size-4" class="transition-transform duration-160 group-open/itens:rotate-90" />
+                {{ $itemsLabel }}
+            </summary>
+            <div class="mt-1 flex flex-col gap-2">
+                {{ $items }}
+            </div>
+        </details>
+    @endisset
 </article>

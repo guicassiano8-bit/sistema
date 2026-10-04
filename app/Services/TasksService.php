@@ -5,9 +5,11 @@ namespace App\Services;
 use App\Enums\Frequency;
 use App\Enums\PointCurrency;
 use App\Enums\PointTransactionType;
+use App\Enums\ShoppingStatus;
 use App\Enums\TaskRank;
 use App\Enums\TaskStatus;
 use App\Models\RecurringTask;
+use App\Models\ShoppingItem;
 use App\Models\Task;
 use App\Models\User;
 use App\Support\Jogador;
@@ -132,7 +134,7 @@ class TasksService
         [$inicio, $fim] = $this->periodo($visao, $data);
 
         // consulta, ainda sem ir ao banco; os filtros valem para as quatro visões
-        $missoes = $this->aplicarFiltros(Task::query()->with('recurringTask'), $filtros);
+        $missoes = $this->aplicarFiltros(Task::query()->with(['recurringTask', 'shoppingItems']), $filtros);
 
         $extras = match ($visao) {
             'dia' => ['missoes' => $this->missoesDoDia($missoes, $data)],
@@ -225,6 +227,11 @@ class TasksService
 
             $missao->update($campos);
 
+            // itens do Inventário acompanham a data da missão "Fazer Compras"
+            if (isset($campos['scheduled_date'])) {
+                $missao->shoppingItems()->update(['scheduled_date' => $data]);
+            }
+
             if ($molde) {
                 $this->recorrencia->gerar(molde: $molde);
             }
@@ -248,10 +255,16 @@ class TasksService
     /** Traz todas as pendentes de dias anteriores para hoje. Devolve quantas foram movidas. */
     public function trazerAtrasadasParaHoje(): int
     {
-        return Task::query()->overdue()->update([
-            'scheduled_date' => today(),
-            'rescheduled_count' => DB::raw('rescheduled_count + 1'),
-        ]);
+        return DB::transaction(function () {
+            $atrasadas = Task::query()->overdue()->pluck('id');
+
+            ShoppingItem::query()->whereIn('task_id', $atrasadas)->update(['scheduled_date' => today()]);
+
+            return Task::query()->whereIn('id', $atrasadas)->update([
+                'scheduled_date' => today(),
+                'rescheduled_count' => DB::raw('rescheduled_count + 1'),
+            ]);
+        });
     }
 
     /**
@@ -278,6 +291,9 @@ class TasksService
             if ($missao->is_done) {
                 $this->desmarcar($missao, $user);
             }
+
+            // sem a missão, os itens deixam de ter data de compra
+            $missao->shoppingItems()->update(['task_id' => null, 'scheduled_date' => null]);
 
             $missao->delete();
         });
@@ -358,9 +374,51 @@ class TasksService
     {
         abort_if($missao->status === TaskStatus::Cancelled, 422, 'Missão cancelada não pode ser alternada.');
 
-        return $missao->is_done
-            ? $this->desmarcar($missao, $user)
-            : $this->concluir($missao, $user);
+        return DB::transaction(function () use ($missao, $user) {
+            $resultado = $missao->is_done
+                ? $this->desmarcar($missao, $user)
+                : $this->concluir($missao, $user);
+
+            // "Fazer Compras": concluir marca todos os itens; desfazer devolve todos a pendente
+            $this->aplicarNosItens($missao, $resultado['done']);
+
+            return $resultado;
+        });
+    }
+
+    /**
+     * Mantém a conclusão da missão "Fazer Compras" coerente com os itens: pendente com todos os
+     * itens comprados → conclui; concluída com algum item pendente → estorna.
+     *
+     * @return array{done: bool, jogador: Jogador, leveled_up: bool, rank_changed: bool}|null null se nada mudou
+     */
+    public function sincronizarConclusaoComItens(Task $missao, User $user): ?array
+    {
+        if ($missao->status === TaskStatus::Cancelled || ! $missao->shoppingItems()->exists()) {
+            return null;
+        }
+
+        $temPendente = $missao->shoppingItems()->where('status', ShoppingStatus::Pending->value)->exists();
+
+        if ($missao->status === TaskStatus::Pending && ! $temPendente) {
+            return $this->concluir($missao, $user);
+        }
+
+        if ($missao->is_done && $temPendente) {
+            return $this->desmarcar($missao, $user);
+        }
+
+        return null;
+    }
+
+    private function aplicarNosItens(Task $missao, bool $comprados): void
+    {
+        $missao->shoppingItems()
+            ->where('status', ($comprados ? ShoppingStatus::Pending : ShoppingStatus::Purchased)->value)
+            ->update([
+                'status' => ($comprados ? ShoppingStatus::Purchased : ShoppingStatus::Pending)->value,
+                'purchased_at' => $comprados ? now() : null,
+            ]);
     }
 
     /** Muda a data de uma ocorrência sem alterar a regra de recorrência. */
@@ -368,10 +426,16 @@ class TasksService
     {
         abort_unless($missao->status === TaskStatus::Pending, 422, 'Só missões pendentes podem ser transferidas.');
 
-        $missao->update([
-            'scheduled_date' => Carbon::createFromFormat('!Y-m-d', $data),
-            'rescheduled_count' => $missao->rescheduled_count + 1,
-        ]);
+        $novaData = Carbon::createFromFormat('!Y-m-d', $data);
+
+        DB::transaction(function () use ($missao, $novaData) {
+            $missao->update([
+                'scheduled_date' => $novaData,
+                'rescheduled_count' => $missao->rescheduled_count + 1,
+            ]);
+
+            $missao->shoppingItems()->update(['scheduled_date' => $novaData]);
+        });
     }
 
     private function concluir(Task $missao, User $user): array

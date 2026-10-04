@@ -6,11 +6,11 @@
       :toggle-url="route('inventario.toggle', $item)"
       :edit-url="route('inventario.edit', $item)" />
 
-  rarity (aceita os dois nomes):
-    urgente | legendary      → LENDÁRIO    roxo + glow + ponto pulsante
-    importante | rare        → RARO        azul
-    dia_a_dia | common       → COMUM       cinza
-    nao_importante | junk    → DESCARTÁVEL apagado
+  rarity (valor do enum ShoppingCategory, equivalente pt-BR ou nome visual):
+    urgent | urgente | legendary          → LENDÁRIO    roxo + glow + ponto pulsante
+    important | importante | rare         → RARO        azul
+    daily | dia_a_dia | common            → COMUM       cinza
+    not_important | nao_importante | junk → DESCARTÁVEL apagado
   Estado "comprado": riscado, 60% de opacidade, vai para o fim da lista (ordene no controller).
 --}}
 @props([
@@ -25,7 +25,10 @@
 ])
 
 @php
-$alias = ['urgente' => 'legendary', 'importante' => 'rare', 'dia_a_dia' => 'common', 'nao_importante' => 'junk'];
+$alias = [
+    'urgent' => 'legendary', 'important' => 'rare', 'daily' => 'common', 'not_important' => 'junk',
+    'urgente' => 'legendary', 'importante' => 'rare', 'dia_a_dia' => 'common', 'nao_importante' => 'junk',
+];
 $r = $alias[$rarity] ?? $rarity;
 $map = [
     'legendary' => ['tag' => 'Lendário',    'text' => 'text-rank-s-text', 'card' => '[--ch-border:#A855F7] [--ch-bg:#140F24] glow-s',                 'box' => '[--ch-border:#C084FC]'],

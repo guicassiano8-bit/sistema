@@ -19,7 +19,7 @@ class StatusService
     public function dadosDaTela(): array
     {
         $hoje = today();
-        $missoesHoje = $this->tasks->missoesDoDia(Task::query()->with('recurringTask'), $hoje);
+        $missoesHoje = $this->tasks->missoesDoDia(Task::query()->with(['recurringTask', 'shoppingItems']), $hoje);
 
         // atrasadas aparecem na lista, mas não entram na barra de "concluídas hoje"
         $agendadasHoje = $missoesHoje->filter(fn (Task $m) => $m->scheduled_date->isSameDay($hoje));

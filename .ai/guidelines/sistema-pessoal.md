@@ -170,7 +170,10 @@ Os valores acima são o ponto de partida; o `app.css` do projeto é a fonte da v
 
 - As rotas de toggle (`missoes.toggle`, `inventario.toggle`) respondem JSON quando `expectsJson()`: `{ done, player: {xp, xp_max, level, gold, rank, rank_changed}, leveled_up, toast }`.
 - Um `View::composer` no layout `components.layouts.app` fornece `$jogador` e `$navBadges`.
-- Error bags dos modais: `missaoRapida`, `recompensa`, `investimento`, `lancamento_gasto`, `lancamento_ganho`.
+- Error bags dos modais e formulários: `missaoRapida`, `recompensa`, `inventario`, `investimento`, `lancamento_gasto`, `lancamento_ganho`.
+- Item do Inventário com `scheduled_date` entra na missão avulsa "Fazer Compras" daquele dia (10 XP, 0 ouro, uma por dia, criada por `ShoppingService`). Ela é apagada quando fica sem itens, exceto se já foi concluída. O vínculo é `shopping_items.task_id`; `Task::shoppingItems()` precisa de eager load ao renderizar `missoes._card`.
+- A conclusão da missão "Fazer Compras" acompanha os itens: concluir (ou desfazer) a missão marca (ou desmarca) todos os itens; marcar o último item pendente conclui a missão, e desmarcar um item de missão concluída a estorna. A regra fica em `TasksService` (`alternarConclusao`, `sincronizarConclusaoComItens`) e `ShoppingService::alternar`, então vale em qualquer tela. Excluir o último item pendente, ou tirar a data dele (limpar ou trocar), também conclui a missão se só restarem itens comprados; "Limpar adquiridos" não conclui nada.
+- `inventario.toggle` responde `{ done }` (o item em si não gera XP, ouro nem lançamento financeiro). Quando o toggle conclui ou estorna a missão "Fazer Compras", acrescenta `mission: { done }`, `player`, `leveled_up` e `toast`. O badge do Inventário (`$navBadges['inventario']`) conta os itens urgentes pendentes.
 - Para animar a contagem do ouro após um redirect: `->with('ouro_anterior', $valor)`.
 
 ### Blade e front-end
