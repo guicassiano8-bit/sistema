@@ -16,6 +16,7 @@ class FinanceService
     public function __construct(
         private TransactionService $transactions,
         private InvestmentService $investments,
+        private FinanceReportService $reports,
     ) {}
 
     /** Cai em Resumo quando ?aba= está ausente ou é desconhecida, em vez de dar erro. */
@@ -42,9 +43,9 @@ class FinanceService
             'contas' => Account::query()->active()->orderBy('name')->pluck('name', 'id')->all(),
             'indexadores' => Indexer::options(),
 
-            // resumo
-            'resumo' => ['patrimonio' => 0, 'delta_pct' => 0, 'ganhos_mes' => 0, 'gastos_mes' => 0, 'passivo_mes' => 0],
-            'ultimos' => collect(),
+            // resumo (Parte 5)
+            'resumo' => $aba === FinanceTab::Summary ? $this->reports->resumo(today()) : null,
+            'ultimos' => $aba === FinanceTab::Summary ? $this->transactions->ultimos() : collect(),
 
             // extrato (Parte 2)
             'mes' => $mes,

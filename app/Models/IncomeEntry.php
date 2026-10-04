@@ -47,8 +47,8 @@ class IncomeEntry extends Model
     public function scopePaidInMonth(Builder $query, CarbonInterface $month): void
     {
         $query->whereBetween('payment_date', [
-            $month->copy()->startOfMonth()->toDateString(),
-            $month->copy()->endOfMonth()->toDateString(),
+            $month->copy()->startOfMonth(),
+            $month->copy()->endOfMonth(),
         ]);
     }
 

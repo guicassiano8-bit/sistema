@@ -111,9 +111,10 @@ class Transaction extends Model
     /** Lançamentos de um mês. Aceita qualquer data dentro do mês. */
     public function scopeInMonth(Builder $query, CarbonInterface $month): void
     {
+        // Carbon (e não texto) para o último dia entrar também quando a coluna guarda data e hora
         $query->whereBetween('date', [
-            $month->copy()->startOfMonth()->toDateString(),
-            $month->copy()->endOfMonth()->toDateString(),
+            $month->copy()->startOfMonth(),
+            $month->copy()->endOfMonth(),
         ]);
     }
 

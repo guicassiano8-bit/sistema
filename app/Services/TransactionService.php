@@ -53,17 +53,37 @@ class TransactionService
             default => null,
         };
 
+        return [
+            'porDia' => $lista->orderByDesc('date')->orderByDesc('id')->get()
+                ->groupBy(fn (Transaction $t) => $t->date->format('Y-m-d')),
+            'totais' => $this->totaisDoMes($mes),
+        ];
+    }
+
+    /**
+     * Entradas e saídas já pagas no mês.
+     *
+     * @return array{entradas: string, saidas: string}
+     */
+    public function totaisDoMes(CarbonInterface $mes): array
+    {
         $somas = Transaction::query()->inMonth($mes)->paid()
             ->selectRaw('type, SUM(amount) as total')->groupBy('type')->pluck('total', 'type');
 
         return [
-            'porDia' => $lista->orderByDesc('date')->orderByDesc('id')->get()
-                ->groupBy(fn (Transaction $t) => $t->date->format('Y-m-d')),
-            'totais' => [
-                'entradas' => $this->decimal($somas[TransactionType::Income->value] ?? 0),
-                'saidas' => $this->decimal($somas[TransactionType::Expense->value] ?? 0),
-            ],
+            'entradas' => $this->decimal($somas[TransactionType::Income->value] ?? 0),
+            'saidas' => $this->decimal($somas[TransactionType::Expense->value] ?? 0),
         ];
+    }
+
+    /**
+     * Os lançamentos mais recentes, de qualquer mês.
+     *
+     * @return Collection<int, Transaction>
+     */
+    public function ultimos(int $limite = 5): Collection
+    {
+        return Transaction::query()->with('category')->orderByDesc('date')->orderByDesc('id')->limit($limite)->get();
     }
 
     /**

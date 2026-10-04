@@ -42,6 +42,49 @@ class InvestmentService
             ->map(fn (Asset $asset) => $this->posicao($asset));
     }
 
+    /**
+     * Valor dos ativos ativos hoje (sem $ate) ou no fim de um dia passado.
+     * Rendimentos recebidos não entram: não são patrimônio, só desempenho.
+     */
+    public function valorTotal(?CarbonInterface $ate = null): BigDecimal
+    {
+        $zero = BigDecimal::zero()->toScale(2);
+
+        if ($ate === null) {
+            return $this->carteira()->reduce(fn (BigDecimal $soma, AssetPosition $p) => $soma->plus($p->current), $zero);
+        }
+
+        return Asset::query()->active()->with('assetType')->get()
+            ->reduce(fn (BigDecimal $soma, Asset $asset) => $soma->plus($this->valorEm($asset, $ate)), $zero);
+    }
+
+    /** Mesma regra de posicao(), olhando só o que existia até o fim de $data. */
+    private function valorEm(Asset $asset, CarbonInterface $data): BigDecimal
+    {
+        $fim = $data->copy()->endOfDay();
+        $transacoes = $this->ordenar($asset->transactions()->where('date', '<=', $fim)->get());
+
+        if ($asset->assetType->is_market_traded) {
+            ['quantity' => $quantidade, 'cost' => $custo] = $this->estado($transacoes);
+            $preco = $asset->quotes()->where('date', '<=', $fim)->orderByDesc('date')->value('price');
+
+            return $preco === null ? $custo : $quantidade->multipliedBy($preco)->toScale(2, RoundingMode::HalfUp);
+        }
+
+        $saldo = $asset->balanceUpdates()->where('reference_date', '<=', $fim)->orderByDesc('reference_date')->value('gross_balance');
+
+        if ($saldo !== null) {
+            return BigDecimal::of($saldo)->toScale(2, RoundingMode::HalfUp);
+        }
+
+        $aplicado = BigDecimal::zero()->toScale(2);
+        foreach ($transacoes as $t) {
+            $aplicado = $t->type->isInflow() ? $aplicado->plus($t->total) : $aplicado->minus($t->total);
+        }
+
+        return BigDecimal::max($aplicado, BigDecimal::zero())->toScale(2);
+    }
+
     /** Usa só as relações já carregadas (o modo estrito do Eloquent proíbe lazy loading). */
     public function posicao(Asset $asset): AssetPosition
     {

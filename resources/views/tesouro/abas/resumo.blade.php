@@ -1,11 +1,12 @@
 {{--
   ABA RESUMO
-  $resumo  ['patrimonio', 'delta_pct', 'ganhos_mes', 'gastos_mes' (positivo), 'passivo_mes']
-  $ultimos Collection<Lancamento> (5 mais recentes)
+  $resumo  strings decimais: patrimonio, contas, investido, ganhos_mes, gastos_mes (positivo), saldo_mes, passivo_mes
+           delta_pct (float|null: nulo sem mês anterior para comparar) · pct_gasto (int, 0–100)
+  $ultimos Collection<Transaction> (5 mais recentes, com category)
 --}}
 @php
-$saldo = $resumo['ganhos_mes'] - $resumo['gastos_mes'];
-$pctGasto = $resumo['ganhos_mes'] > 0 ? min(100, $resumo['gastos_mes'] / $resumo['ganhos_mes'] * 100) : 100;
+$delta = $resumo['delta_pct'];
+$pctGasto = $resumo['pct_gasto'];
 @endphp
 
 {{-- 1 · ATRIBUTO PRINCIPAL --}}
@@ -14,14 +15,21 @@ $pctGasto = $resumo['ganhos_mes'] > 0 ? min(100, $resumo['gastos_mes'] / $resumo
     <p class="mt-1 font-display text-4xl font-bold text-ink text-glow lg:text-stat">
         <x-sys.money :value="$resumo['patrimonio']" />
     </p>
-    <p @class(['mt-2 inline-flex items-center gap-1.5 text-sm tabular', 'text-gain-text' => $resumo['delta_pct'] >= 0, 'text-danger-text' => $resumo['delta_pct'] < 0])>
-        <x-sys.icon :name="$resumo['delta_pct'] >= 0 ? 'trending-up' : 'trending-down'" size="size-4" />
-        {{ $resumo['delta_pct'] >= 0 ? '+' : '−' }}{{ number_format(abs($resumo['delta_pct']), 1, ',', '.') }}% em relação ao mês passado
+    @if ($delta !== null)
+        <p @class(['mt-2 inline-flex items-center gap-1.5 text-sm tabular', 'text-gain-text' => $delta >= 0, 'text-danger-text' => $delta < 0])>
+            <x-sys.icon :name="$delta >= 0 ? 'trending-up' : 'trending-down'" size="size-4" />
+            {{ $delta >= 0 ? '+' : '−' }}{{ number_format(abs($delta), 1, ',', '.') }}% em relação ao mês passado
+        </p>
+    @else
+        <p class="mt-2 text-sm text-ink-muted">Sem mês anterior para comparar.</p>
+    @endif
+    <p class="mt-1 text-xs text-ink-muted">
+        Contas <x-sys.money :value="$resumo['contas']" /> · Investimentos <x-sys.money :value="$resumo['investido']" />
     </p>
 </x-sys.window>
 
 {{-- 2–3 · FLUXO DO MÊS + GANHO PASSIVO --}}
-<div class="grid grid-cols-3 gap-2">
+<div class="grid grid-cols-2 gap-2">
     <x-sys.stat label="Ganhos" icon="trending-up" tone="gain"><x-sys.money :value="$resumo['ganhos_mes']" :decimals="0" /></x-sys.stat>
     <x-sys.stat label="Gastos" icon="trending-down" tone="danger"><x-sys.money :value="$resumo['gastos_mes']" :decimals="0" /></x-sys.stat>
     <x-sys.stat label="Passivo" icon="zap" tone="sys" hint="rendimentos"><x-sys.money :value="$resumo['passivo_mes']" :decimals="0" /></x-sys.stat>
@@ -30,7 +38,7 @@ $pctGasto = $resumo['ganhos_mes'] > 0 ? min(100, $resumo['gastos_mes'] / $resumo
 <x-sys.window label="Saldo do mês" padding="sm">
     <div class="flex items-baseline justify-between px-1">
         <span class="text-sm text-ink-soft">Gastou {{ round($pctGasto) }}% do que ganhou</span>
-        <x-sys.money :value="$saldo" signed class="font-display text-lg font-semibold" />
+        <x-sys.money :value="$resumo['saldo_mes']" signed class="font-display text-lg font-semibold" />
     </div>
     <div class="mt-2 px-1">
         <x-sys.xp-bar :current="round($pctGasto)" :max="100" size="md" :show-values="false"
